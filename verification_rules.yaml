@@ -1,0 +1,133 @@
+# VERDICT Verification Rules Configuration
+# Mini DSL for defining verification rules
+
+# Rule Structure:
+# - name: Human-readable rule name
+# - type: Rule category (price_verification, sentiment_check, proof_verification, etc.)
+# - condition: Boolean expression to evaluate
+# - action: What to do if condition fails (reject, warn, log)
+# - severity: critical, high, medium, low
+# - message: Error message to display when rule fails
+
+rules:
+  # ===== Price Verification Rules =====
+  
+  - name: "FTSO Price Tolerance"
+    type: "price_verification"
+    condition: "ftso_price_diff_pct <= 2.0"
+    action: "reject"
+    severity: "critical"
+    message: "FTSO price differs by more than 2% from declared price - possible price manipulation"
+    description: "Ensures that the AI's declared price matches FTSO oracle price within 2% tolerance"
+  
+  - name: "Price Sanity Check"
+    type: "price_verification"
+    condition: "market_data.price > 0"
+    action: "reject"
+    severity: "critical"
+    message: "Invalid price data detected (price <= 0)"
+    description: "Basic sanity check to ensure price is a positive number"
+  
+  # ===== Sentiment Rules =====
+  
+  - name: "Sentiment Floor"
+    type: "sentiment_check"
+    condition: "sentiment_data.overall_sentiment >= -10.0"
+    action: "warn"
+    severity: "medium"
+    message: "Sentiment extremely negative (< -10), high risk environment"
+    description: "Warns when sentiment is extremely negative, indicating high market risk"
+  
+  - name: "Sentiment Ceiling"
+    type: "sentiment_check"
+    condition: "sentiment_data.overall_sentiment <= 10.0"
+    action: "warn"
+    severity: "medium"
+    message: "Sentiment extremely positive (> 10), possible euphoria bubble"
+    description: "Warns when sentiment is extremely positive, indicating possible overheating"
+  
+  # ===== Data Provenance Rules =====
+  
+  - name: "FDC Proof Required"
+    type: "proof_verification"
+    condition: "fdc_verified == true"
+    action: "reject"
+    severity: "critical"
+    message: "FDC attestation proof is missing or invalid - data provenance cannot be verified"
+    description: "Ensures all external data has valid FDC attestation proofs from Flare"
+  
+  - name: "Verification Hash Present"
+    type: "proof_verification"
+    condition: "verification_hash != null and verification_hash != ''"
+    action: "reject"
+    severity: "high"
+    message: "Verification hash is missing - cryptographic proof unavailable"
+    description: "Ensures cryptographic verification hash is generated for all decisions"
+  
+  # ===== On-Chain Verification Rules =====
+  
+  - name: "Contract Verification"
+    type: "contract_verification"
+    condition: "contract_verified != false"
+    action: "warn"
+    severity: "high"
+    message: "On-chain verification failed or pending"
+    description: "Warns when smart contract verification has not succeeded"
+  
+  # ===== Risk Management Rules =====
+  
+  - name: "Confidence Minimum"
+    type: "risk_check"
+    condition: "confidence >= 30.0"
+    action: "warn"
+    severity: "low"
+    message: "Low confidence signal (< 30%) - consider waiting for stronger signal"
+    description: "Warns when AI confidence is too low for reliable trading"
+  
+  - name: "Leverage Safety Cap"
+    type: "risk_check"
+    condition: "leverage_suggestion.suggested_leverage <= 20"
+    action: "warn"
+    severity: "medium"
+    message: "Extremely high leverage suggested (> 20x) - high liquidation risk"
+    description: "Warns when suggested leverage exceeds safe thresholds"
+  
+  # ===== Market Data Quality Rules =====
+  
+  - name: "Volume Sanity"
+    type: "market_quality"
+    condition: "market_data.volume_24h > 0"
+    action: "warn"
+    severity: "low"
+    message: "24h trading volume is zero or unavailable"
+    description: "Ensures market has sufficient liquidity"
+
+  - name: "Market Cap Minimum"
+    type: "market_quality"
+    condition: "market_data.market_cap > 1000000"
+    action: "warn"
+    severity: "medium"
+    message: "Market cap is very low (< $1M) - high manipulation risk"
+    description: "Warns when trading very low market cap assets"
+
+# Rule Evaluation Order:
+# 1. Critical severity rules are evaluated first
+# 2. If any critical rule with action='reject' fails, the decision is blocked
+# 3. Warning rules are evaluated but don't block the decision
+# 4. All rule results are returned for transparency
+
+# Context Variables Available:
+# - market_data.price: Current token price
+# - market_data.volume_24h: 24-hour trading volume
+# - market_data.market_cap: Market capitalization
+# - market_data.percent_change_24h: 24-hour price change percentage
+# - sentiment_data.overall_sentiment: Overall sentiment score (-10 to +10)
+# - sentiment_data.risk_level: Risk level (Low, Medium, High)
+# - ftso_price: Price from FTSO oracle
+# - ftso_price_diff_pct: Percentage difference between declared and FTSO price
+# - fdc_verified: Whether FDC attestation is verified
+# - contract_verified: Whether on-chain verification succeeded
+# - verification_hash: Cryptographic verification hash
+# - confidence: AI confidence percentage (0-100)
+# - leverage_suggestion.suggested_leverage: Suggested leverage multiplier
+# - recommendation: Trading recommendation (LONG, SHORT, HOLD)

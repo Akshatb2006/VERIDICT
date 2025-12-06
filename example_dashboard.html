@@ -238,76 +238,61 @@
                 Flare Network Verification Status
             </h3>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                <!-- FTSO Status -->
-                <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">FTSO Price Feed</div>
-                    <div id="ftso-status" style="font-size: 18px; font-weight: bold;">
-                        <span class="loading">⏳ Checking...</span>
-                    </div>
-                </div>
-
-                <!-- FDC Status -->
-                <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">FDC Data Verification</div>
-                    <div id="fdc-status" style="font-size: 18px; font-weight: bold;">
-                        <span class="loading">⏳ Checking...</span>
-                    </div>
-                </div>
-
-                <!-- Smart Contract Status -->
-                <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">On-Chain Verification</div>
-                    <div id="contract-status" style="font-size: 18px; font-weight: bold;">
-                        <span class="loading">⏳ Pending...</span>
-                    </div>
-                </div>
-
-                <!-- Overall Status -->
-                <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                    <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Overall Verification</div>
-                    <div id="overall-status" style="font-size: 18px; font-weight: bold;">
-                        <span class="loading">⏳ Processing...</span>
-                    </div>
+            <!-- Component Status Table (Feature 1: Real-Time Component Visualization) -->
+            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Component Health Status</div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(255,255,255,0.2);">
+                            <th style="text-align: left; padding: 8px; font-size: 12px;">Component</th>
+                            <th style="text-align: center; padding: 8px; font-size: 12px;">Status</th>
+                            <th style="text-align: right; padding: 8px; font-size: 12px;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 8px; font-size: 13px;">FTSO Price Feed</td>
+                            <td id="ftso-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳
+                                Checking...</td>
+                            <td id="ftso-details"
+                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 8px; font-size: 13px;">CMC API</td>
+                            <td id="cmc-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳ Checking...
+                            </td>
+                            <td id="cmc-details"
+                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 8px; font-size: 13px;">FDC Endpoint</td>
+                            <td id="fdc-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳ Checking...
+                            </td>
+                            <td id="fdc-details"
+                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; font-size: 13px;">Contract Log</td>
+                            <td id="contract-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳
+                                Pending...</td>
+                            <td id="contract-details"
+                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="component-overall-status"
+                    style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 5px; text-align: center; font-weight: bold;">
+                    Overall System: <span id="overall-status">⏳ Processing...</span>
                 </div>
             </div>
 
-            <!-- Declared Inputs Section -->
-            <details style="margin-top: 15px; cursor: pointer;">
-                <summary style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-weight: bold;">
-                    📋 Declared AI Inputs
-                </summary>
-                <pre id="declared-inputs"
-                    style="margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 11px; overflow-x: auto; max-height: 300px;">
-                    Awaiting data...
-                </pre>
-            </details>
-
-            <!-- Input Hash -->
-            <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🔐 Input Hash:</div>
-                <code id="input-hash-display"
-                    style="font-family: monospace; font-size: 11px; word-break: break-all; display: block;">
-                    ―
-                </code>
-            </div>
-
-            <!-- On-Chain Decision ID -->
-            <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; display: none;"
-                id="decision-id-container">
-                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">📝 On-Chain Decision:</div>
-                <a id="decision-link" href="#" target="_blank"
-                    style="color: #ffeb3b; text-decoration: none; font-family: monospace; font-size: 11px; word-break: break-all;">
-                    <code id="decision-id-display">―</code>
-                </a>
-                <div style="font-size: 10px; opacity: 0.7; margin-top: 5px;">Click to view on Coston2 Explorer</div>
-            </div>
-
-            <!-- Verification Hash -->
-            <div id="verification-details"
-                style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; display: none;">
-                <div style="opacity: 0.8;">Verification Hash:</div>
-                <div id="verification-hash" style="font-family: monospace; word-break: break-all; margin-top: 5px;">
+            <!-- Original verification badges kept for compatibility -->
+            <div style="display: none;">
+                <div id="verification-details"
+                    style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; display: none;">
+                    <div style="opacity: 0.8;">Verification Hash:</div>
+                    <div id="verification-hash" style="font-family: monospace; word-break: break-all; margin-top: 5px;">
+                    </div>
                 </div>
             </div>
 
@@ -344,6 +329,46 @@
             <button id="activateBtn">🚀 Activate Agent</button>
             <button id="deactivateBtn" disabled>⏹️ Deactivate Agent</button>
         </div>
+
+        <!-- Feature 2: Attack Simulation Controls -->
+        <div id="attack-simulation-panel"
+            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 15px; padding: 20px; margin: 20px 0; color: white;">
+            <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 24px;">⚠️</span>
+                Attack Simulation (Demo)
+            </h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <button id="simulateAttackBtn"
+                    style="background: #ff4757; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;">
+                    💣 Simulate Price Attack
+                </button>
+                <button id="resetSimulationBtn" disabled
+                    style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;">
+                    🔄 Reset to Normal
+                </button>
+            </div>
+            <div id="attack-info"
+                style="margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: none;">
+                <div style="font-weight: bold; margin-bottom: 8px;">🚨 ATTACK MODE ACTIVE</div>
+                <div id="attack-details" style="font-size: 13px; line-height: 1.5;"></div>
+            </div>
+        </div>
+
+        <!-- Feature 3: Rules Engine Viewer -->
+        <details id="rules-panel" style="background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 20px 0;">
+            <summary style="cursor: pointer; font-weight: bold; font-size: 1.2em; color: #333;">
+                📋 Verification Rules Engine (Click to expand)
+            </summary>
+            <div style="margin-top: 15px;">
+                <div id="rules-summary"
+                    style="padding: 10px; background: #e3f2fd; border-radius: 8px; margin-bottom: 15px; color: #1976d2;">
+                    Loading rules...
+                </div>
+                <div id="rules-list" style="display: grid; gap: 10px;">
+                    <!-- Rules will be populated here by JavaScript -->
+                </div>
+            </div>
+        </details>
 
         <div id="recommendation" class="recommendation HOLD">Waiting for Activation...</div>
 
@@ -527,9 +552,278 @@
             // Reasoning
             document.getElementById('reasoning').textContent = data.reasoning;
 
-            // Update Flare verification status
-            updateVerificationStatus(data);
+            // Update component status (Feature 1)
+            updateComponentStatus(data);
+
+            // Update rules evaluation (Feature 3)
+            updateRulesDisplay(data);
         }
+
+        // ========== FEATURE 1: Component Status Visualization ==========
+
+        function updateComponentStatus(data) {
+            // If component_status is available in the data
+            if (data.component_status && data.component_status.components) {
+                const components = data.component_status.components;
+
+                // Update FTSO
+                if (components.ftso_price_feed) {
+                    const ftso = components.ftso_price_feed;
+                    document.getElementById('ftso-status').innerHTML = getStatusBadge(ftso.status);
+                    if (ftso.metadata && ftso.metadata.price) {
+                        document.getElementById('ftso-details').textContent = `$${ftso.metadata.price.toFixed(2)}`;
+                    }
+                }
+
+                // Update CMC API
+                if (components.cmc_api) {
+                    const cmc = components.cmc_api;
+                    document.getElementById('cmc-status').innerHTML = getStatusBadge(cmc.status);
+                    if (cmc.response_time_ms) {
+                        document.getElementById('cmc-details').textContent = `${cmc.response_time_ms}ms`;
+                    }
+                }
+
+                // Update FDC
+                if (components.fdc_endpoint) {
+                    const fdc = components.fdc_endpoint;
+                    document.getElementById('fdc-status').innerHTML = getStatusBadge(fdc.status);
+                    document.getElementById('fdc-details').textContent = fdc.error_message || '—';
+                }
+
+                // Update Contract
+                if (components.contract_log) {
+                    const contract = components.contract_log;
+                    document.getElementById('contract-status').innerHTML = getStatusBadge(contract.status);
+                    document.getElementById('contract-details').textContent = contract.error_message || '—';
+                }
+
+                // Overall status
+                const overall = data.component_status.overall;
+                document.getElementById('overall-status').innerHTML = getOverallStatusBadge(overall);
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'healthy': '✅ Healthy',
+                'warning': '⚠️ Warning',
+                'error': '❌ Error',
+                'offline': '❌ Offline',
+                'unknown': '❓ Unknown'
+            };
+            return badges[status] || status;
+        }
+
+        function getOverallStatusBadge(status) {
+            const badges = {
+                'healthy': '✅ Fully Operational',
+                'degraded': '⚠️ Degraded',
+                'critical': '❌ Critical',
+                'offline': '❌ System Offline'
+            };
+            return badges[status] || status;
+        }
+
+        // ========== FEATURE 2: Attack Simulation ==========
+
+        let attackModeActive = false;
+
+        document.getElementById('simulateAttackBtn').addEventListener('click', async () => {
+            const token = document.getElementById('token').value.trim().toUpperCase();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const risk = document.getElementById('risk').value;
+
+            try {
+                document.getElementById('simulateAttackBtn').disabled = true;
+                document.getElementById('simulateAttackBtn').textContent = '⏳ Simulating...';
+
+                const response = await fetch(`${API_URL}/simulate-attack`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: token,
+                        stablecoin: 'USDC',
+                        portfolio_amount: amount,
+                        risk_level: risk,
+                        attack_type: 'price_manipulation'
+                    })
+                });
+
+                const result = await response.json();
+                console.log('💣 Attack simulated:', result);
+
+                // Show attack info
+                document.getElementById('attack-info').style.display = 'block';
+
+                let detailsHtml = `
+                    <div style="margin-bottom: 8px;"><strong>Attack Type:</strong> ${result.attack_info.description}</div>
+                    <div style="margin-bottom: 8px;"><strong>Original Price:</strong> $${result.original_price.toFixed(2)}</div>
+                    <div style="margin-bottom: 8px;"><strong>Tampered Price:</strong> $${result.tampered_price.toFixed(2)}</div>
+                    <div style="margin-bottom: 8px;"><strong>Verification:</strong> ❌ <span style="color: #ff6b6b;">FAILED - Data Tampering Detected!</span></div>
+                `;
+
+                if (result.attack_info.tampering_details && result.attack_info.tampering_details.length > 0) {
+                    detailsHtml += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);"><strong>Detection Details:</strong></div>`;
+                    result.attack_info.tampering_details.forEach(detail => {
+                        detailsHtml += `<div style="margin-top: 5px; font-size: 12px;">• ${detail.detection || detail.method}</div>`;
+                    });
+                }
+
+                document.getElementById('attack-details').innerHTML = detailsHtml;
+
+                // Enable reset button
+                document.getElementById('resetSimulationBtn').disabled = false;
+                document.getElementById('resetSimulationBtn').style.background = '#4caf50';
+                document.getElementById('simulateAttackBtn').textContent = '💣 Attack Active';
+
+                attackModeActive = true;
+
+            } catch (error) {
+                console.error('❌ Attack simulation error:', error);
+                alert('Failed to simulate attack');
+                document.getElementById('simulateAttackBtn').disabled = false;
+                document.getElementById('simulateAttackBtn').textContent = '💣 Simulate Price Attack';
+            }
+        });
+
+        document.getElementById('resetSimulationBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_URL}/reset-simulation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+                console.log('🔄 Simulation reset:', result);
+
+                // Hide attack info
+                document.getElementById('attack-info').style.display = 'none';
+
+                // Reset buttons
+                document.getElementById('simulateAttackBtn').disabled = false;
+                document.getElementById('simulateAttackBtn').textContent = '💣 Simulate Price Attack';
+                document.getElementById('resetSimulationBtn').disabled = true;
+                document.getElementById('resetSimulationBtn').style.background = 'rgba(255,255,255,0.3)';
+
+                attackModeActive = false;
+
+            } catch (error) {
+                console.error('❌ Reset error:', error);
+            }
+        });
+
+        // ========== FEATURE 3: Rules Engine Viewer ==========
+
+        async function loadRulesEngine() {
+            try {
+                const response = await fetch(`${API_URL}/rules`);
+                const rulesData = await response.json();
+
+                // Update summary
+                document.getElementById('rules-summary').innerHTML = `
+                    <strong>Total Rules:</strong> ${rulesData.total_rules} | 
+                    <strong>By Severity:</strong> Critical: ${rulesData.rules_by_severity.critical || 0}, 
+                    High: ${rulesData.rules_by_severity.high || 0}, 
+                    Medium: ${rulesData.rules_by_severity.medium || 0}
+                `;
+
+                // Display rules
+                const rulesList = document.getElementById('rules-list');
+                rulesList.innerHTML = '';
+
+                if (rulesData.rules && rulesData.rules.length > 0) {
+                    rulesData.rules.forEach(rule => {
+                        const ruleDiv = document.createElement('div');
+                        ruleDiv.style.cssText = 'padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #667eea;';
+
+                        const severityColor = {
+                            'critical': '#f44336',
+                            'high': '#ff9800',
+                            'medium': '#ffc107',
+                            'low': '#4caf50'
+                        }[rule.severity] || '#999';
+
+                        ruleDiv.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
+                                <strong style="color: #333;">${rule.name}</strong>
+                                <span style="background: ${severityColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase;">${rule.severity}</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666; margin-bottom: 5px;">${rule.description}</div>
+                            <div style="font-size: 12px; color: #999;">
+                                <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px;">${rule.condition}</code>
+                            </div>
+                        `;
+
+                        rulesList.appendChild(ruleDiv);
+                    });
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading rules:', error);
+                document.getElementById('rules-summary').textContent = 'Error loading rules';
+            }
+        }
+
+        function updateRulesDisplay(data) {
+            if (data.rules_evaluation) {
+                const rulesEval = data.rules_evaluation;
+
+                // Update summary with evaluation results
+                const summaryEl = document.getElementById('rules-summary');
+                const passedCount = rulesEval.rules_passed || 0;
+                const totalCount = rulesEval.rules_evaluated || 0;
+                const status = rulesEval.overall_status;
+
+                let statusColor = '#4caf50';
+                let statusText = '✅ All Rules Passed';
+
+                if (status === 'critical_failure' || status === 'blocked') {
+                    statusColor = '#f44336';
+                    statusText = '❌ Critical Rules Failed';
+                } else if (status === 'warnings') {
+                    statusColor = '#ff9800';
+                    statusText = '⚠️ Some Warnings';
+                }
+
+                summaryEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div><strong>Rules Status:</strong> ${passedCount}/${totalCount} Passed</div>
+                        <div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: bold;">
+                            ${statusText}
+                        </div>
+                    </div>
+                `;
+
+                // Update individual rules with pass/fail status
+                if (rulesEval.results && rulesEval.results.length > 0) {
+                    const rulesList = document.getElementById('rules-list');
+                    rulesList.innerHTML = '';
+
+                    rulesEval.results.forEach(result => {
+                        const ruleDiv = document.createElement('div');
+                        const borderColor = result.passed ? '#4caf50' : '#f44336';
+                        const bgColor = result.passed ? '#f1f8f4' : '#fff5f5';
+
+                        ruleDiv.style.cssText = `padding: 12px; background: ${bgColor}; border-radius: 8px; border-left: 4px solid ${borderColor};`;
+
+                        ruleDiv.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <strong style="color: #333;">${result.rule_name}</strong>
+                                <span style="font-size: 18px;">${result.passed ? '✅' : '❌'}</span>
+                            </div>
+                            ${!result.passed && result.message ? `<div style="font-size: 13px; color: #d32f2f; font-weight: 500;">⚠️ ${result.message}</div>` : ''}
+                            <div style="font-size: 11px; color: #999; margin-top: 5px;">Type: ${result.type} | Severity: ${result.severity}</div>
+                        `;
+
+                        rulesList.appendChild(ruleDiv);
+                    });
+                }
+            }
+        }
+
+        // Load rules on page load
+        loadRulesEngine();
 
         // ========== Flare Network Integration ==========
 

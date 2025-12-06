@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
+import yaml
 
 from market_data import CoinMarketCapAPI
 from sentiment_analyzer import SentimentAnalyzer
@@ -18,6 +19,9 @@ from aptos_analyzer import AptosAnalyzer
 from decision_engine import DecisionEngine
 from position_manager import PositionManager, RiskLevel
 from ftso_price_feed import FTSOPriceFeed
+from component_monitor import ComponentMonitor
+from attack_simulator import AttackSimulator
+from rules_engine import RulesEngine
 import hashlib
 
 # Load environment variables
@@ -57,6 +61,22 @@ ftso_price_feed = FTSOPriceFeed(
     network="coston2"
 )
 print("✅ FTSO Price Feed initialized for real verification")
+
+# Initialize Component Monitor (Feature 1)
+component_monitor = ComponentMonitor(
+    cmc_api=cmc,
+    ftso_feed=ftso_price_feed,
+    flare_verifier=None  # Will be initialized if needed
+)
+print("✅ Component Monitor initialized")
+
+# Initialize Attack Simulator (Feature 2)
+attack_simulator = AttackSimulator()
+print("✅ Attack Simulator initialized")
+
+# Initialize Rules Engine (Feature 3)
+rules_engine = RulesEngine("verification_rules.yaml")
+print(f"✅ Rules Engine initialized with {len(rules_engine.rules)} rules")
 
 # Store positions by session (in production, use database)
 active_positions = {}
@@ -98,6 +118,10 @@ class AnalysisResponse(BaseModel):
     contract_verified: Optional[bool] = None  # None = Pending
     verified: bool
     verification_hash: str
+    # Enhanced Verification Fields (New Features)
+    component_status: Optional[dict] = None  # Component health status
+    rules_evaluation: Optional[dict] = None  # Rules engine results
+    tampered: Optional[bool] = False  # Attack simulation flag
 
 
 def calculate_perp_trade_details(recommendation: str, market_data: dict, 
@@ -401,6 +425,42 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
         
     print(f"[Flare Verification] FTSO: ${ftso_price:.2f}, FDC: {fdc_verified}, Contract: {contract_verified}, Overall: {overall_verified}, Hash: {verification_hash[:16]}...")
     
+    # === Component Status Monitoring (Feature 1) ===
+    component_status_result = None
+    try:
+        component_status_result = await component_monitor.check_all_components(token)
+        print(f"[Component Monitor] Overall status: {component_status_result['overall']}")
+    except Exception as e:
+        print(f"⚠️ [Component Monitor] Error checking components: {e}")
+    
+    # === Rules Engine Evaluation (Feature 3) ===
+    rules_evaluation_result = None
+    try:
+        # Build context for rules evaluation
+        rules_context = {
+            'market_data': fresh_market_data,
+            'sentiment_data': fresh_sentiment_data,
+            'ftso_price': ftso_price,
+            'fdc_verified': fdc_verified,
+            'contract_verified': contract_verified,
+            'verification_hash': verification_hash,
+            'confidence': confidence,
+            'leverage_suggestion': fresh_leverage_info,
+            'recommendation': recommendation,
+            'timestamp': current_timestamp
+        }
+        
+        rules_evaluation_result = rules_engine.evaluate_rules(rules_context)
+        print(f"[Rules Engine] {rules_evaluation_result['rules_passed']}/{rules_evaluation_result['rules_evaluated']} rules passed, Status: {rules_evaluation_result['overall_status']}")
+        
+        # If critical rules failed, override verification status
+        if rules_evaluation_result['should_block']:
+            print(f"❌ [Rules Engine] CRITICAL RULES FAILED - BLOCKING DECISION")
+            overall_verified = False
+            contract_verified = False
+    except Exception as e:
+        print(f"⚠️ [Rules Engine] Error evaluating rules: {e}")
+    
     result = {
         'token': str(token.upper()),
         'stablecoin': str(stablecoin.upper()),
@@ -426,7 +486,11 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
         'fdc_verified': bool(fdc_verified),
         'contract_verified': contract_verified,  # True/False/None
         'verified': bool(overall_verified),
-        'verification_hash': str(verification_hash)
+        'verification_hash': str(verification_hash),
+        # Enhanced Verification Fields (New Features)
+        'component_status': component_status_result,
+        'rules_evaluation': rules_evaluation_result,
+        'tampered': False
     }
     
     # Log the actual values to verify they're fresh
@@ -946,6 +1010,84 @@ async def health_check():
             "gemini": "configured" if gemini_api_key else "not configured"
         }
     }
+
+
+# ========== NEW ENDPOINTS FOR ENHANCED FEATURES ==========
+
+@app.get("/api/component-status")
+async def get_component_status(token: str = "BTC"):
+    """
+    Get real-time component health status
+    Feature 1: Component Status Visualization
+    """
+    try:
+        status = await component_monitor.check_all_components(token)
+        return status
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error checking component status: {str(e)}")
+
+
+class AttackRequest(BaseModel):
+    token: str
+    stablecoin: str = "USDC"
+    portfolio_amount: float
+    risk_level: str = "moderate"
+    attack_type: str = "price_manipulation"
+
+
+@app.post("/api/simulate-attack")
+async def simulate_attack(request: AttackRequest):
+    """
+    Simulate a data tampering attack
+    Feature 2: Tamper Simulation
+    """
+    try:
+        session_id = f"{request.token.upper()}_{request.stablecoin.upper()}_{request.portfolio_amount}"
+        
+        normal_analysis = await perform_analysis(
+            request.token,
+            request.stablecoin,
+            request.portfolio_amount,
+            request.risk_level,
+            session_id
+        )
+        
+        tampered_data, attack_info = attack_simulator.simulate_attack(
+            normal_analysis,
+            request.attack_type
+        )
+        
+        return {
+            "status": "attack_simulated",
+            "attack_info": attack_info,
+            "tampered_analysis": tampered_data,
+            "original_price": normal_analysis.get("market_data", {}).get("price"),
+            "tampered_price": tampered_data.get("market_data", {}).get("price"),
+            "verification_failed": not tampered_data.get("verified", False)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error simulating attack: {str(e)}")
+
+
+@app.post("/api/reset-simulation")
+async def reset_simulation():
+    """Reset attack simulation to normal operation"""
+    try:
+        result = attack_simulator.reset_simulation()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error resetting simulation: {str(e)}")
+
+
+@app.get("/api/rules")
+async def get_rules():
+    """Get verification rules summary - Feature 3: Rules Engine"""
+    try:
+        summary = rules_engine.get_rules_summary()
+        return summary
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting rules: {str(e)}")
 
 
 if __name__ == "__main__":
