@@ -14,32 +14,41 @@ A FastAPI-based real-time trading analyzer that combines market data, AI-powered
 
 ## Setup
 
-1. **Install Dependencies**
+1. **Navigate to Backend Directory**
+   ```bash
+   cd backend
+   ```
+
+2. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Configure Environment Variables**
+3. **Configure Environment Variables**
    
-   Create a `.env` file in the project root:
+   Create a `.env` file in the backend directory:
    ```env
    CMC_API_KEY=your_coinmarketcap_api_key
-   OPENAI_API_KEY=your_openai_api_key
+   GEMINI_API_KEY=your_gemini_api_key
+   FLARE_RPC_URL=your_flare_rpc_url
+   VERIFIER_CONTRACT_ADDRESS=your_contract_address
    ```
 
-3. **Get API Keys**
+4. **Get API Keys**
    - **CoinMarketCap**: Sign up at https://coinmarketcap.com/api/
-   - **OpenAI**: Get your API key from https://platform.openai.com/api-keys
+   - **Gemini AI**: Get your API key from Google AI Studio
 
 ## Running the API
 
 ### Start the FastAPI Server
 ```bash
+cd backend
 python app.py
 ```
 
 Or using uvicorn directly:
 ```bash
+cd backend
 uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -234,16 +243,54 @@ curl -X POST "http://localhost:8000/api/analyze" \
 ## Project Structure
 
 ```
-Sentenex/
-├── app.py                 # FastAPI application with WebSocket support
-├── main.py                # CLI version (legacy)
-├── market_data.py         # CoinMarketCap API integration
-├── sentiment_analyzer.py  # OpenAI sentiment analysis
-├── aptos_analyzer.py      # Aptos on-chain data analysis
-├── decision_engine.py     # Signal combination and recommendation engine
-├── test_client.py         # Test client for WebSocket and REST endpoints
-├── requirements.txt       # Python dependencies
-└── README.md             # This file
+SentenexAI/
+├── backend/                   # Backend API Server
+│   ├── app.py                 # Main FastAPI application
+│   ├── app_flare.py          # Flare Network integration
+│   ├── main.py               # CLI version 
+│   ├── market_data.py        # CoinMarketCap API integration
+│   ├── sentiment_analyzer.py # AI sentiment analysis
+│   ├── aptos_analyzer.py     # Aptos on-chain data analysis
+│   ├── decision_engine.py    # Signal combination & recommendation
+│   ├── position_manager.py   # Position management
+│   ├── flare_verifier.py     # Flare verification logic
+│   ├── flare_data_connector.py # FDC integration
+│   ├── ftso_price_feed.py    # FTSO price feeds
+│   ├── component_monitor.py  # Component health monitoring
+│   ├── attack_simulator.py   # Security testing
+│   ├── rules_engine.py       # Verification rules engine
+│   ├── websocket_client.py   # WebSocket support
+│   ├── test_*.py             # Test files
+│   ├── .env                  # Environment variables
+│   ├── requirements.txt      # Python dependencies
+│   ├── verification_rules.yaml # Rules configuration
+│   ├── scripts/              # Utility scripts
+│   │   ├── setup.sh
+│   │   ├── continuous_check.sh
+│   │   ├── poll_agent.sh
+│   │   └── test_api.sh
+│   ├── cache/                # Cache directory
+│   └── artifacts/            # Build artifacts
+│
+├── frontend/                  # Web Dashboard
+│   ├── dashboard.html        # Main trading dashboard
+│   └── verification.html     # Flare verification UI
+│
+├── contracts/                 # Smart Contracts
+│   ├── VerifierContract.sol  # Flare verifier contract
+│   └── scripts/              # Deployment scripts
+│
+├── sdk-python/               # Python SDK
+│   ├── verdict_sdk/          # SDK source code
+│   ├── examples/             # Usage examples
+│   ├── setup.py              # Package setup
+│   └── README.md             # SDK documentation
+│
+├── README.md                 # This file
+├── CURL_COMMANDS.md          # API examples
+├── SDK_USAGE_GUIDE.md        # SDK usage guide
+├── DEPLOYMENT_GUIDE.md       # Deployment instructions
+└── *.md                      # Other documentation
 ```
 
 ## Frontend Integration Example

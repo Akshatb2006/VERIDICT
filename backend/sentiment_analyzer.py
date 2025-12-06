@@ -172,19 +172,14 @@ class SentimentAnalyzer:
         price_change_24h = market_data.get('percent_change_24h', 0)
         price_change_1h = market_data.get('percent_change_1h', 0)
         
-        # Weighted scoring
-        score = (overall_sentiment * 0.4) + (short_term * 0.3) + (price_change_24h * 0.2) + (price_change_1h * 0.1)
+        # Use overall sentiment directly (it's already on -100 to +100 scale)
+        # Apply a simple threshold for extremely dynamic signals
+        score = overall_sentiment
         
-        # Risk adjustment
-        if risk_level == "High":
-            score *= 0.7  # Reduce confidence for high risk
-        elif risk_level == "Low":
-            score *= 1.1  # Slightly increase confidence for low risk
-        
-        # Generate recommendation
-        if score > 10:
+        # Generate recommendation (sentiment-based with low thresholds)
+        if score > 5:
             return "LONG"
-        elif score < -10:
+        elif score < -5:
             return "SHORT"
         else:
             return "HOLD"

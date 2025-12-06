@@ -524,9 +524,15 @@
 
         // Update UI with data
         function updateUI(data) {
-            // Recommendation
+            // Recommendation with explanation
             const recDiv = document.getElementById('recommendation');
-            recDiv.textContent = data.recommendation;
+            const meanings = {
+                'LONG': '📈 BUY / ENTER POSITION',
+                'SHORT': '📉 SELL / EXIT POSITION',
+                'HOLD': '⏸️ WAIT / NO ACTION'
+            };
+            const actionText = meanings[data.recommendation] || '';
+            recDiv.innerHTML = `${data.recommendation}<div style="font-size: 0.4em; margin-top: 10px; opacity: 0.9;">${actionText}</div>`;
             recDiv.className = `recommendation ${data.recommendation}`;
 
             // Market data

@@ -56,18 +56,18 @@ class DecisionEngine:
         # Combine all signals
         final_score = (sentiment_component + momentum_component + onchain_component) * risk_multiplier
         
-        # Determine recommendation (lowered thresholds for more sensitivity)
-        # LONG: score > 15 (was 25)
-        # SHORT: score < -15 (was -25)
-        if final_score > 15:
+        # Determine recommendation (extremely sensitive - almost always shows signal)
+        # LONG: score > 0.5 (reduced from 3 to account for weighted calculation)
+        # SHORT: score < -0.5 (reduced from -3 to account for weighted calculation)
+        if final_score > 0.5:
             recommendation = "LONG"
-            confidence = min(abs(final_score) / 50, 1.0)  # More sensitive confidence
-        elif final_score < -15:
+            confidence = min(abs(final_score) / 10, 1.0)  # Adjusted for new threshold
+        elif final_score < -0.5:
             recommendation = "SHORT"
-            confidence = min(abs(final_score) / 50, 1.0)  # More sensitive confidence
+            confidence = min(abs(final_score) / 10, 1.0)  # Adjusted for new threshold
         else:
             recommendation = "HOLD"
-            confidence = 1.0 - (abs(final_score) / 15)  # Adjusted for new threshold
+            confidence = 1.0 - (abs(final_score) / 0.5)  # Adjusted for new threshold
         
         # Calculate position sizing suggestion (for perp DEX)
         leverage_suggestion = self._suggest_leverage(confidence, risk_level)
