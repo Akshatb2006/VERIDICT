@@ -182,9 +182,9 @@ class SentimentAnalyzer:
             score *= 1.1  # Slightly increase confidence for low risk
         
         # Generate recommendation
-        if score > 30:
+        if score > 10:
             return "LONG"
-        elif score < -30:
+        elif score < -10:
             return "SHORT"
         else:
             return "HOLD"

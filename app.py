@@ -93,6 +93,10 @@ class PerpTradeRequest(BaseModel):
     stablecoin: str = "USDC"  # Collateral stablecoin (USDC or USDT)
     portfolio_amount: float  # Amount of stablecoin for trading (e.g., 100.0 USDC)
     risk_level: str = "moderate"  # conservative, moderate, or aggressive
+    # Optional: User-provided API keys (BYOK - Bring Your Own Key)
+    cmc_api_key: Optional[str] = None  # User's CoinMarketCap API key
+    gemini_api_key: Optional[str] = None  # User's Google Gemini API key
+
 
 
 class AnalysisResponse(BaseModel):
@@ -181,18 +185,33 @@ def calculate_perp_trade_details(recommendation: str, market_data: dict,
 
 
 async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float, 
-                          risk_level: str, session_id: str = "default") -> dict:
+                          risk_level: str, session_id: str = "default",
+                          cmc_api_key: Optional[str] = None,
+                          gemini_api_key: Optional[str] = None) -> dict:
     """
     Perform complete perp trading analysis pipeline
     Uses USDC/USDT as collateral to trade the provided token
+    
+    Args:
+        token: Token symbol to analyze (e.g., APT, BTC, ETH)
+        stablecoin: Collateral stablecoin (USDC or USDT)
+        portfolio_amount: Amount of stablecoin for trading
+        risk_level: Risk level (conservative, moderate, aggressive)
+        session_id: Session identifier for tracking
+        cmc_api_key: Optional user-provided CoinMarketCap API key
+        gemini_api_key: Optional user-provided Google Gemini API key
     """
     analysis_start_time = datetime.now()
     print(f"[perform_analysis] Starting fresh analysis for {token} at {analysis_start_time.isoformat()}")
     
+    # Use user-provided API keys if available, otherwise fall back to env vars
+    user_cmc = CoinMarketCapAPI(cmc_api_key) if cmc_api_key else cmc
+    user_sentiment_analyzer = SentimentAnalyzer(gemini_api_key) if gemini_api_key else sentiment_analyzer
+    
     # Step 1: Fetch market data for the token we want to trade
     # Always fetch fresh data - no caching - make actual API call
     print(f"[perform_analysis] Fetching fresh market data from CMC API...")
-    market_data = cmc.get_token_info(token.upper())
+    market_data = user_cmc.get_token_info(token.upper())
     
     if not market_data:
         raise HTTPException(
@@ -206,7 +225,7 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
     # For real-time updates, we'll use a simplified sentiment based on market data
     # Full OpenAI analysis can be done less frequently
     print(f"[perform_analysis] Analyzing sentiment...")
-    sentiment_data = await sentiment_analyzer.analyze_token_sentiment(
+    sentiment_data = await user_sentiment_analyzer.analyze_token_sentiment(
         token.upper(),
         market_data['name'],
         market_data
@@ -676,6 +695,10 @@ async def analyze_perp_trade(request: PerpTradeRequest):
     If agent is not activated, performs a one-time analysis.
     
     Frontend should poll this endpoint repeatedly (e.g., every 1 second) to get real-time updates.
+    
+    Supports BYOK (Bring Your Own Key):
+    - Optionally provide cmc_api_key and gemini_api_key in the request
+    - If not provided, will use server's environment variables (if configured)
     """
     session_id = f"{request.token.upper()}_{request.stablecoin.upper()}_{request.portfolio_amount}"
     
@@ -804,14 +827,16 @@ async def analyze_perp_trade(request: PerpTradeRequest):
                 agent_status='initializing'
             )
     
-    # Agent not activated - perform one-time analysis
+    # Agent not activated    # Perform one-time analysis (not activated)
     try:
         result = await perform_analysis(
             request.token,
             request.stablecoin,
             request.portfolio_amount,
             request.risk_level,
-            session_id
+            session_id,
+            cmc_api_key=request.cmc_api_key,
+            gemini_api_key=request.gemini_api_key
         )
         return AnalysisResponse(**result)
     except Exception as e:
