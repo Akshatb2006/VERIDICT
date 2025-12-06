@@ -36,6 +36,42 @@
       "artifacts": [
         "VerifierContract"
       ]
+    },
+    "/home/akshat-baranwal/Desktop/2nd-SentenexAI-main-by-soumikbaksi-&-team/2nd-SentenexAI-main-by-soumikbaksi-&-team/Sentenex-main/contracts/VerifiedTradingEngine.sol": {
+      "lastModificationDate": 1765025457883,
+      "contentHash": "c6146d243afb0ab2a9aabea9d8435446",
+      "sourceName": "contracts/VerifiedTradingEngine.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "VerifiedTradingEngine"
+      ]
     }
   }
 }

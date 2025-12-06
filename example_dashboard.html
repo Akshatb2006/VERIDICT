@@ -272,6 +272,37 @@
                 </div>
             </div>
 
+            <!-- Declared Inputs Section -->
+            <details style="margin-top: 15px; cursor: pointer;">
+                <summary style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-weight: bold;">
+                    📋 Declared AI Inputs
+                </summary>
+                <pre id="declared-inputs"
+                    style="margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 11px; overflow-x: auto; max-height: 300px;">
+                    Awaiting data...
+                </pre>
+            </details>
+
+            <!-- Input Hash -->
+            <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">🔐 Input Hash:</div>
+                <code id="input-hash-display"
+                    style="font-family: monospace; font-size: 11px; word-break: break-all; display: block;">
+                    ―
+                </code>
+            </div>
+
+            <!-- On-Chain Decision ID -->
+            <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; display: none;"
+                id="decision-id-container">
+                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">📝 On-Chain Decision:</div>
+                <a id="decision-link" href="#" target="_blank"
+                    style="color: #ffeb3b; text-decoration: none; font-family: monospace; font-size: 11px; word-break: break-all;">
+                    <code id="decision-id-display">―</code>
+                </a>
+                <div style="font-size: 10px; opacity: 0.7; margin-top: 5px;">Click to view on Coston2 Explorer</div>
+            </div>
+
             <!-- Verification Hash -->
             <div id="verification-details"
                 style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; display: none;">

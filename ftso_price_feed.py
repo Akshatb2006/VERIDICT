@@ -29,13 +29,16 @@ class FTSOPriceFeed:
     Provides prices attested by multiple independent data providers
     """
     
-    # FTSO contract addresses on Coston2 testnet
-    FTSO_CONTRACTS = {
-        "BTC/USD": "0x...",  # TODO: Add actual contract addresses
-        "ETH/USD": "0x...",
-        "FLR/USD": "0x...",
-        "XRP/USD": "0x...",
-        "DOGE/USD": "0x...",
+    # Flare Contract Registry on Coston2 (THE authoritative registry)
+    FLARE_CONTRACT_REGISTRY = "0x1000000000000000000000000000000000000002"
+    
+    # Feed names (not IDs - we'll hash them)
+    FEED_NAMES = {
+        "BTC": "BTC/USD",
+        "ETH": "ETH/USD",
+        "FLR": "FLR/USD",
+        "XRP": "XRP/USD",
+        "DOGE": "DOGE/USD",
     }
     
     def __init__(
@@ -46,59 +49,154 @@ class FTSOPriceFeed:
         self.rpc_url = rpc_url
         self.network = network
         self.session: Optional[aiohttp.ClientSession] = None
+        self.w3 = None
+        self.registry_contract = None
+        self.ftso_cache = {}  # Cache resolved FTSO contracts
+    
+    async def _init_web3(self):
+        """Initialize Web3 connection to Coston2"""
+        if self.w3 is None:
+            from web3 import Web3
+            self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
+            
+            # Verify connection
+            if not self.w3.is_connected():
+                raise ConnectionError(f"Cannot connect to Flare RPC: {self.rpc_url}")
+            
+            # Verify chain ID (Coston2 = 114)
+            chain_id = self.w3.eth.chain_id
+            if chain_id != 114:
+                logger.warning(f"[FTSO] Chain ID is {chain_id}, expected 114 for Coston2")
+            
+            logger.info(f"[FTSO] Connected to Flare Coston2 (Chain ID: {chain_id})")
+            
+            # Initialize Flare Contract Registry
+            # Minimal ABI - just what we need
+            registry_abi = [{
+                "inputs": [{"name": "_name", "type": "string"}],
+                "name": "getContractAddressByName",
+                "outputs": [{"type": "address"}],
+                "stateMutability": "view",
+                "type": "function"
+            }]
+            
+            self.registry_contract = self.w3.eth.contract(
+                address=Web3.to_checksum_address(self.FLARE_CONTRACT_REGISTRY),
+                abi=registry_abi
+            )
+            
+            logger.info(f"[FTSO] Flare Contract Registry initialized at {self.FLARE_CONTRACT_REGISTRY}")
+    
+    async def _get_ftso_contract(self, feed_name: str):
+        """Dynamically resolve FTSO contract for a given feed"""
+        if feed_name in self.ftso_cache:
+            return self.ftso_cache[feed_name]
+        
+        # Hash the feed name (e.g., "BTC/USD") to get feed ID
+        from web3 import Web3
+        feed_id = Web3.keccak(text=feed_name)
+        
+        # Query registry for FTSO contract address
+        try:
+            ftso_address = self.registry_contract.functions.getContractAddressByName(
+                feed_name
+            ).call()
+            
+            if ftso_address == "0x0000000000000000000000000000000000000000":
+                raise ValueError(f"Feed '{feed_name}' not found in registry")
+            
+            # FTSOv2 ABI - getCurrentPrice and getCurrentPriceWithDecimals
+            ftso_abi = [
+                {
+                    "inputs": [],
+                    "name": "getCurrentPrice",
+                    "outputs": [{"type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "getCurrentPriceWithDecimals",
+                    "outputs": [
+                        {"name": "price", "type": "uint256"},
+                        {"name": "timestamp", "type": "uint256"},
+                        {"name": "decimals", "type": "uint256"}
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ]
+            
+            ftso_contract = self.w3.eth.contract(
+                address=Web3.to_checksum_address(ftso_address),
+                abi=ftso_abi
+            )
+            
+            self.ftso_cache[feed_name] = ftso_contract
+            logger.info(f"[FTSO] Resolved {feed_name} → {ftso_address}")
+            
+            return ftso_contract
+            
+        except Exception as e:
+            logger.error(f"[FTSO] Failed to resolve {feed_name}: {e}")
+            raise
     
     async def _get_session(self) -> aiohttp.ClientSession:
         """Get or create aiohttp session"""
         if self.session is None:
             self.session = aiohttp.ClientSession()
-        return self.session
     
     async def get_price(self, symbol: str) -> FTSOPrice:
         """
-        Get current price from FTSO
+        Get REAL price from FTSO v2 contract (Phase 5 - FIXED)
         
         Args:
-            symbol: Trading pair (e.g., "BTC/USD")
+            symbol: Trading pair base (e.g., "BTC", "ETH")
             
         Returns:
-            FTSOPrice with current price and metadata
+            FTSOPrice with actual validator price
         """
-        logger.info(f"[FTSO] Requesting price for {symbol}")
+        logger.info(f"[FTSO] Requesting REAL price for {symbol}")
         
         try:
-            # Normalize symbol
-            normalized_symbol = self._normalize_symbol(symbol)
+            # Initialize Web3 if needed
+            await self._init_web3()
             
-            # Get price from FTSO API
-            session = await self._get_session()
+            # Get feed name
+            symbol_clean = symbol.upper().replace("/USD", "").replace("USD", "").strip()
+            feed_name = self.FEED_NAMES.get(symbol_clean)
             
-            async with session.get(
-                f"https://fdc-api.flare.network/ftso/v1/price/{normalized_symbol}",
-                timeout=5
-            ) as response:
-                if response.status != 200:
-                    logger.error(f"[FTSO] Price request failed: {response.status}")
-                    return self._create_fallback_price(symbol)
-                
-                data = await response.json()
-                
-                price_data = data.get("data", {})
-                
-                ftso_price = FTSOPrice(
-                    symbol=symbol,
-                    price=float(price_data.get("price", 0)) / (10 ** price_data.get("decimals", 0)),
-                    timestamp=price_data.get("timestamp", int(datetime.now().timestamp())),
-                    decimals=price_data.get("decimals", 2),
-                    provider="FTSO",
-                    confidence=price_data.get("confidence", 0.95)
-                )
-                
-                logger.info(f"[FTSO] Price received: ${ftso_price.price:,.2f}")
-                
-                return ftso_price
-                
+            if not feed_name:
+                logger.warning(f"[FTSO] No feed for {symbol_clean}, using fallback")
+                return self._create_fallback_price(symbol)
+            
+            # Dynamically resolve FTSO contract for this feed
+            ftso_contract = await self._get_ftso_contract(feed_name)
+            
+            # Call getCurrentPriceWithDecimals() - returns (price, timestamp, decimals)
+            price_data = ftso_contract.functions.getCurrentPriceWithDecimals().call()
+            price_value = price_data[0]
+            timestamp = price_data[1]
+            decimals = price_data[2]
+            
+            # Calculate actual price
+            real_price = float(price_value) / (10 ** decimals)
+            
+            ftso_price = FTSOPrice(
+                symbol=symbol,
+                price=real_price,
+                timestamp=timestamp,
+                decimals=decimals,
+                provider="FTSO_V2_REAL",
+                confidence=0.99
+            )
+            
+            logger.info(f"[FTSO] ✅ REAL price from Flare validators: ${ftso_price.price:,.2f}")
+            
+            return ftso_price
+            
         except Exception as e:
-            logger.error(f"[FTSO] Error fetching price: {e}")
+            logger.error(f"[FTSO] Error fetching REAL price: {e}")
             return self._create_fallback_price(symbol)
     
     async def get_price_with_timestamp(self, symbol: str) -> Tuple[FTSOPrice, int]:
