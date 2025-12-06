@@ -1,0 +1,17 @@
+{
+    "name": "verdict-flare-contracts",
+    "version": "1.0.0",
+    "description": "Smart contracts for VERDICT on Flare Network",
+    "scripts": {
+        "compile": "hardhat compile",
+        "deploy": "hardhat run contracts/scripts/deploy.js --network coston2",
+        "test": "hardhat test"
+    },
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+        "hardhat": "^2.27.1"
+    },
+    "dependencies": {
+        "dotenv": "^17.2.3"
+    }
+}

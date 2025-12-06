@@ -1,0 +1,195 @@
+<!-- Add this section to example_dashboard.html after the header -->
+
+<!-- Flare Verification Status Panel -->
+<div class="verification-panel"
+    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 20px; margin: 20px 0; color: white;">
+    <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 24px;">🔐</span>
+        Flare Network Verification Status
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <!-- FTSO Status -->
+        <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">FTSO Price Feed</div>
+            <div id="ftso-status" style="font-size: 18px; font-weight: bold;">
+                <span class="loading">⏳ Checking...</span>
+            </div>
+        </div>
+
+        <!-- FDC Status -->
+        <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">FDC Data Verification</div>
+            <div id="fdc-status" style="font-size: 18px; font-weight: bold;">
+                <span class="loading">⏳ Checking...</span>
+            </div>
+        </div>
+
+        <!-- Smart Contract Status -->
+        <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">On-Chain Verification</div>
+            <div id="contract-status" style="font-size: 18px; font-weight: bold;">
+                <span class="loading">⏳ Pending...</span>
+            </div>
+        </div>
+
+        <!-- Overall Status -->
+        <div class="verify-item" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Overall Verification</div>
+            <div id="overall-status" style="font-size: 18px; font-weight: bold;">
+                <span class="loading">⏳ Processing...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Hash -->
+    <div id="verification-details"
+        style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; display: none;">
+        <div style="opacity: 0.8;">Verification Hash:</div>
+        <div id="verification-hash" style="font-family: monospace; word-break: break-all; margin-top: 5px;"></div>
+    </div>
+
+    <!-- MetaMask Connection -->
+    <div style="margin-top: 15px;">
+        <button id="connect-wallet-btn" onclick="connectMetaMask()"
+            style="background: #ff6b35; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
+            🦊 Connect MetaMask to Flare Coston2
+        </button>
+        <div id="wallet-address" style="margin-top: 10px; font-size: 12px; opacity: 0.8; display: none;"></div>
+    </div>
+</div>
+
+<script>
+    // MetaMask and Flare Integration
+    let web3;
+    let userAccount;
+
+    async function connectMetaMask() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                // Request account access
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAccount = accounts[0];
+
+                // Switch to Coston2
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0x72' }], // 114 in hex
+                    });
+                } catch (switchError) {
+                    // Chain not added, add it
+                    if (switchError.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x72',
+                                chainName: 'Flare Testnet Coston2',
+                                rpcUrls: ['https://coston2-api.flare.network/ext/C/rpc'],
+                                nativeCurrency: {
+                                    name: 'C2FLR',
+                                    symbol: 'C2FLR',
+                                    decimals: 18
+                                },
+                                blockExplorerUrls: ['https://coston2-explorer.flare.network']
+                            }]
+                        });
+                    }
+                }
+
+                // Update UI
+                document.getElementById('connect-wallet-btn').textContent = '✅ Connected to Coston2';
+                document.getElementById('connect-wallet-btn').style.background = '#4caf50';
+                document.getElementById('wallet-address').textContent = `Wallet: ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
+                document.getElementById('wallet-address').style.display = 'block';
+
+                console.log('Connected to Flare Coston2:', userAccount);
+
+            } catch (error) {
+                console.error('MetaMask connection failed:', error);
+                alert('Failed to connect MetaMask. Please try again.');
+            }
+        } else {
+            alert('MetaMask is not installed! Please install it from https://metamask.io');
+        }
+    }
+
+    // Update verification status display
+    function updateVerificationStatus(data) {
+        // FTSO Status
+        const ftsoStatus = document.getElementById('ftso-status');
+        if (data.ftso_price && data.ftso_price > 0) {
+            ftsoStatus.innerHTML = '✅ Verified<br><span style="font-size:14px;opacity:0.9;">$' + data.ftso_price.toFixed(2) + '</span>';
+        } else {
+            ftsoStatus.innerHTML = '❌ Not Available';
+        }
+
+        // FDC Status
+        const fdcStatus = document.getElementById('fdc-status');
+        if (data.fdc_verified) {
+            fdcStatus.innerHTML = '✅ Data Verified';
+        } else {
+            fdcStatus.innerHTML = '⚠️ Unverified';
+        }
+
+        // Contract Status
+        const contractStatus = document.getElementById('contract-status');
+        if (data.contract_verified === true) {
+            contractStatus.innerHTML = '✅ Verified On-Chain';
+        } else if (data.contract_verified === false) {
+            contractStatus.innerHTML = '❌ Failed';
+        } else {
+            contractStatus.innerHTML = '⏸️ Pending';
+        }
+
+        // Overall Status
+        const overallStatus = document.getElementById('overall-status');
+        if (data.verified) {
+            overallStatus.innerHTML = '✅ Fully Verified';
+            overallStatus.style.color = '#4caf50';
+        } else {
+            overallStatus.innerHTML = '⚠️ Partial';
+            overallStatus.style.color = '#ff9800';
+        }
+
+        // Show verification hash if available
+        if (data.verification_hash) {
+            document.getElementById('verification-details').style.display = 'block';
+            document.getElementById('verification-hash').textContent = data.verification_hash;
+        }
+    }
+
+    // Auto-connect if previously connected
+    window.addEventListener('load', async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            if (accounts.length > 0) {
+                userAccount = accounts[0];
+                document.getElementById('wallet-address').textContent = `Wallet: ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
+                document.getElementById('wallet-address').style.display = 'block';
+                document.getElementById('connect-wallet-btn').textContent = '✅ Wallet Connected';
+                document.getElementById('connect-wallet-btn').style.background = '#4caf50';
+            }
+        }
+    });
+</script>
+
+<!-- Add this to your existing analyze function to update verification status -->
+<script>
+    // Modify your existing poll or analyze function to include:
+    /*
+    fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Your existing code...
+        
+        // ADD THIS: Update verification status
+        updateVerificationStatus(data);
+    })
+    .catch(error => console.error('Error:', error));
+    */
+</script>

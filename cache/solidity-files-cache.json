@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/akshat-baranwal/Desktop/2nd-SentenexAI-main-by-soumikbaksi-&-team/2nd-SentenexAI-main-by-soumikbaksi-&-team/Sentenex-main/contracts/VerifierContract.sol": {
+      "lastModificationDate": 1765018839399,
+      "contentHash": "ad6ebfefdbdc742617b83518c6ba04fa",
+      "sourceName": "contracts/VerifierContract.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "VerifierContract"
+      ]
+    }
+  }
+}

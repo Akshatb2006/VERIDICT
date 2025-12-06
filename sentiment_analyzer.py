@@ -1,5 +1,5 @@
 """
-Google Gemini-powered sentiment analysis for tokens
+Google Gemini-powered sentiment analysis for tokens with Flare FDC verification
 """
 import os
 import google.generativeai as genai
@@ -9,22 +9,43 @@ from datetime import datetime
 
 
 class SentimentAnalyzer:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, fdc_connector=None):
         # Configure Gemini with API key
         genai.configure(api_key=api_key)
         # Use gemini-2.5-flash for speed and real-time trading analysis
         self.model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        # Flare Data Connector for verification
+        self.fdc = fdc_connector
     
-    def analyze_token_sentiment(self, token_symbol: str, token_name: str, 
-                                market_data: Dict) -> Dict:
+    async def analyze_token_sentiment(self, token_symbol: str, token_name: str, 
+                                market_data: Dict, verified_data=None) -> Dict:
         """
-        Analyze sentiment for a token based on market data and generate insights
+        Analyze sentiment for a token based on verified market data
+        
+        Args:
+            token_symbol: Token symbol (e.g., "BTC")
+            token_name: Full token name
+            market_data: Market data dictionary
+            verified_data: Optional VerifiedData from FDC
+            
+        Returns:
+            Sentiment analysis with verification metadata
         """
         try:
             import time
             request_start = time.time()
             print(f"[Gemini API] Making sentiment analysis call for {token_symbol} at {datetime.now().isoformat()}")
             print(f"[Gemini API] Market data - Price: ${market_data.get('price', 0):.4f}, 24h: {market_data.get('percent_change_24h', 0):.2f}%")
+            
+            # If FDC verification available, include it in analysis
+            verification_context = ""
+            if verified_data and verified_data.verified:
+                verification_context = f"""
+                NOTE: This data has been cryptographically verified by Flare Data Connector (FDC).
+                Verification Hash: {verified_data.hash[:16]}...
+                Data is attestation-backed and tamper-proof.
+                """
             
             # Create a comprehensive prompt for sentiment analysis
             prompt = f"""
@@ -36,6 +57,8 @@ class SentimentAnalyzer:
             7d Change: {market_data.get('percent_change_7d', 0):.2f}%
             Market Cap: ${market_data.get('market_cap', 0):,.0f}
             24h Volume: ${market_data.get('volume_24h', 0):,.0f}
+            
+            {verification_context}
             
             Based on this data, provide:
             1. Overall sentiment score (-100 to +100, where -100 is very bearish, +100 is very bullish)
@@ -58,36 +81,83 @@ class SentimentAnalyzer:
             # Generate content with Gemini
             response = self.model.generate_content(prompt)
             
-            # Extract and parse JSON from response
-            content = response.text.strip()
+            request_time = time.time() - request_start
+            print(f"[Gemini API] Response received in {request_time:.2f}s", end="")
+            
+            # Extract JSON from response
+            response_text = response.text.strip()
             
             # Remove markdown code blocks if present
-            if content.startswith("```json"):
-                content = content[7:]  # Remove ```json
-            if content.startswith("```"):
-                content = content[3:]   # Remove ```
-            if content.endswith("```"):
-                content = content[:-3]   # Remove closing ```
-            content = content.strip()
+            if response_text.startswith("```"):
+                response_text = response_text.split("```")[1]
+                if response_text.startswith("json"):
+                    response_text = response_text[4:]
+                response_text = response_text.strip()
             
             # Parse JSON
-            result = json.loads(content)
-            
-            request_time = time.time() - request_start
-            print(f"[Gemini API] Response received in {request_time:.2f}s - Sentiment: {result.get('overall_sentiment', 0):.2f}, Risk: {result.get('risk_level', 'N/A')}")
-            return result
-            
+            try:
+                sentiment_data = json.loads(response_text)
+                print(f" - Sentiment: {sentiment_data.get('overall_sentiment', 0):.2f}, Risk: {sentiment_data.get('risk_level', 'Unknown')}")
+                
+                # Add verification metadata
+                if verified_data:
+                    sentiment_data["fdc_verified"] = verified_data.verified
+                    sentiment_data["fdc_hash"] = verified_data.hash
+                    sentiment_data["fdc_timestamp"] = verified_data.timestamp
+                else:
+                    sentiment_data["fdc_verified"] = False
+                    sentiment_data["fdc_hash"] = None
+                    sentiment_data["fdc_timestamp"] = None
+                
+                return sentiment_data
+                
+            except json.JSONDecodeError:
+                # Fallback parsing
+                print(f" - Failed to parse JSON, using fallback")
+                sentiment_score = self._extract_sentiment_from_text(response_text)
+                
+                return {
+                    "overall_sentiment": sentiment_score,
+                    "short_term_sentiment": sentiment_score,
+                    "medium_term_sentiment": sentiment_score,
+                    "key_factors": ["Price momentum", "Market conditions"],
+                    "risk_level": "Medium",
+                    "reasoning": "Automated analysis based on market data",
+                    "fdc_verified": verified_data.verified if verified_data else False,
+                    "fdc_hash": verified_data.hash if verified_data else None,
+                    "fdc_timestamp": verified_data.timestamp if verified_data else None
+                }
+                
         except Exception as e:
             print(f"Error in sentiment analysis: {e}")
-            # Return neutral sentiment on error
             return {
-                "overall_sentiment": 0,
-                "short_term_sentiment": 0,
-                "medium_term_sentiment": 0,
-                "key_factors": ["Data unavailable"],
-                "risk_level": "Medium",
-                "reasoning": f"Error occurred: {str(e)}"
+                "overall_sentiment": 0.0,
+                "short_term_sentiment": 0.0,
+                "medium_term_sentiment": 0.0,
+                "key_factors": [],
+                "risk_level": "Unknown",
+                "reasoning": f"Error: {str(e)}",
+                "fdc_verified": False,
+                "fdc_hash": None,
+                "fdc_timestamp": None
             }
+    
+    def _extract_sentiment_from_text(self, text: str) -> float:
+        """Extract sentiment score from text response (fallback)"""
+        # Simple keyword-based sentiment extraction
+        positive_keywords = ['bullish', 'positive', 'strong', 'growth', 'upward']
+        negative_keywords = ['bearish', 'negative', 'weak', 'decline', 'downward']
+        
+        text_lower = text.lower()
+        pos_count = sum(1 for kw in positive_keywords if kw in text_lower)
+        neg_count = sum(1 for kw in negative_keywords if kw in text_lower)
+        
+        if pos_count > neg_count:
+            return 50.0
+        elif neg_count > pos_count:
+            return -50.0
+        else:
+            return 0.0
     
     def get_trading_recommendation(self, sentiment_data: Dict, 
                                    market_data: Dict) -> str:

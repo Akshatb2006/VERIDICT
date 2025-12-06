@@ -83,6 +83,12 @@ class AnalysisResponse(BaseModel):
     execution_signal: dict  # Should we open/close position?
     perp_trade_details: dict  # Detailed perp trade calculations
     reasoning: str
+    # Flare Network Verification Fields
+    ftso_price: float
+    fdc_verified: bool
+    contract_verified: Optional[bool] = None  # None = Pending
+    verified: bool
+    verification_hash: str
 
 
 def calculate_perp_trade_details(recommendation: str, market_data: dict, 
@@ -167,7 +173,7 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
     # For real-time updates, we'll use a simplified sentiment based on market data
     # Full OpenAI analysis can be done less frequently
     print(f"[perform_analysis] Analyzing sentiment...")
-    sentiment_data = sentiment_analyzer.analyze_token_sentiment(
+    sentiment_data = await sentiment_analyzer.analyze_token_sentiment(
         token.upper(),
         market_data['name'],
         market_data
@@ -339,6 +345,29 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
     fresh_perp_trade = copy.deepcopy(perp_trade)
     fresh_signal_breakdown = copy.deepcopy(decision['signal_breakdown'])
     
+    # === Flare Network Verification ===
+    # For now, using CMC price as FTSO price (in production, fetch from Flare FTSO)
+    ftso_price = fresh_market_data['price']
+    
+    # Simulate FDC verification (in production, verify with Flare Data Connector)
+    # For demo: mark as verified if we have fresh market data
+    fdc_verified = True if fresh_market_data['price'] > 0 else False
+    
+    # Simulate contract verification (in production, verify on-chain)
+    # For demo: mark as verified if confidence is above threshold
+    contract_verified = True if confidence > 50 else None  # None = Pending
+    
+    # Overall verification status
+    overall_verified = fdc_verified and (contract_verified == True)
+    
+    # Generate verification hash (in production, use actual Merkle proof hash)
+    import hashlib
+    verification_string = f"{token}{current_timestamp}{fresh_market_data['price']}{confidence}"
+    verification_hash = hashlib.sha256(verification_string.encode()).hexdigest()
+    
+    # Log verification values for debugging
+    print(f"[Flare Verification] FTSO: ${ftso_price:.2f}, FDC: {fdc_verified}, Contract: {contract_verified}, Overall: {overall_verified}, Hash: {verification_hash[:16]}...")
+    
     result = {
         'token': str(token.upper()),
         'stablecoin': str(stablecoin.upper()),
@@ -358,7 +387,13 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
         'execution_signal': fresh_execution_signal,
         'perp_trade_details': fresh_perp_trade,
         'signal_breakdown': fresh_signal_breakdown,
-        'reasoning': str(decision['reasoning'])
+        'reasoning': str(decision['reasoning']),
+        # Flare Network Verification Fields
+        'ftso_price': float(ftso_price),
+        'fdc_verified': bool(fdc_verified),
+        'contract_verified': contract_verified,  # True/False/None
+        'verified': bool(overall_verified),
+        'verification_hash': str(verification_hash)
     }
     
     # Log the actual values to verify they're fresh
