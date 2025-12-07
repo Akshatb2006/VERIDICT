@@ -1,410 +1,1028 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VERDICT Trading Dashboard</title>
+    <title>VERIDICT Trading Dashboard</title>
     <style>
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        /* CSS Custom Properties for Theme System */
+        :root {
+            /* Light Theme Variables - Purple/Violet Aesthetic */
+            --color-primary: #ffffff;
+            --color-secondary: #faf7ff;
+            --color-tertiary: #f3f0ff;
+            --color-accent: #8b5cf6;
+            --color-accent-hover: #7c3aed;
+            --color-accent-light: #a78bfa;
+            --color-text: #1f2937;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-border: #e5e7eb;
+            --color-border-light: #f3f4f6;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            --color-info: #8b5cf6;
+            --shadow-sm: 0 1px 3px 0 rgba(139, 92, 246, 0.1);
+            --shadow-md: 0 4px 12px -2px rgba(139, 92, 246, 0.15);
+            --shadow-lg: 0 20px 25px -5px rgba(139, 92, 246, 0.1);
+            --gradient-bg: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 25%, #ede9fe 50%, #ddd6fe 100%);
+            --gradient-card: linear-gradient(145deg, #ffffff 0%, #faf7ff 50%, #f3f0ff 100%);
+            --gradient-accent: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
+            --texture-overlay: linear-gradient(135deg, rgba(139, 92, 246, 0.02) 0%, transparent 30%),
+                              linear-gradient(45deg, rgba(167, 139, 250, 0.01) 0%, transparent 50%);
+        }
+
+        /* Dark Theme Variables - Black-Grey-Purple Aesthetic */
+        [data-theme="dark"] {
+            --color-primary: #0a0a0a;
+            --color-secondary: #111111;
+            --color-tertiary: #1a1a1a;
+            --color-accent: #a855f7;
+            --color-accent-hover: #9333ea;
+            --color-accent-light: #c084fc;
+            --color-text: #ffffff;
+            --color-text-secondary: #b3b3b3;
+            --color-text-muted: #808080;
+            --color-border: #2a2a2a;
+            --color-border-light: #333333;
+            --color-success: #00ff88;
+            --color-warning: #ffaa00;
+            --color-error: #ff4444;
+            --color-info: #a855f7;
+            --shadow-sm: 0 1px 3px 0 rgba(168, 85, 247, 0.2);
+            --shadow-md: 0 4px 12px -2px rgba(168, 85, 247, 0.25);
+            --shadow-lg: 0 20px 25px -5px rgba(168, 85, 247, 0.15);
+            --gradient-bg: linear-gradient(135deg, #0a0a0a 0%, #111111 25%, #1a1a1a 50%, #1e1b2e 75%, #2a1f3d 100%);
+            --gradient-card: linear-gradient(145deg, #111111 0%, #1a1a1a 50%, #1e1b2e 100%);
+            --gradient-accent: linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #7c3aed 100%);
+            --texture-overlay: linear-gradient(135deg, rgba(168, 85, 247, 0.03) 0%, transparent 40%),
+                              linear-gradient(45deg, rgba(46, 27, 78, 0.05) 0%, transparent 60%);
+        }
+
+        /* Global Styles and Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gradient-bg);
+            color: var(--color-text);
+            line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            position: relative;
         }
 
-        .dashboard {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 30px;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--texture-overlay);
+            pointer-events: none;
+            z-index: 1;
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 2.5em;
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .controls label {
+        /* Dashboard Container */
+        .dashboard-container {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: var(--gradient-card);
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--color-text);
+            letter-spacing: -0.04em;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        [data-theme="dark"] .dashboard-title {
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--gradient-card);
+            border: 1px solid var(--color-border);
+            border-radius: 1rem;
+            padding: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            min-width: 3.5rem;
+            min-height: 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .theme-toggle:hover::before {
+            opacity: 0.1;
+        }
+
+        .theme-toggle:focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 3px;
+        }
+
+        .theme-icon {
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            filter: brightness(0) invert(0);
+        }
+
+        [data-theme="dark"] .theme-icon {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Main Content */
+        .dashboard-main {
+            flex: 1;
+            padding: 2rem;
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Card Base Styles */
+        .card {
+            background: var(--gradient-card);
+            border: 1px solid var(--color-border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--color-accent);
+        }
+
+        .card-title {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: -0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .card-title span {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 8px var(--color-accent));
+        }
+
+        .section-icon {
+            transition: all 0.3s ease;
+            filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+        }
+
+        [data-theme="dark"] .section-icon {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+        }
+
+        .metamask-icon {
+            transition: all 0.3s ease;
+            /* Keep MetaMask icon in its original colors */
+        }
+
+        .button-icon {
+            transition: all 0.3s ease;
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+        }
+
+        .btn-danger .button-icon {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+        }
+
+        .btn-secondary .button-icon {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+        }
+
+        [data-theme="dark"] .btn-secondary .button-icon {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+        }
+
+        /* Status Section */
+        .status-section {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            padding: 1.25rem;
+            border-radius: 1rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+
+
+        .status-indicator.inactive {
+            background: var(--gradient-card);
+            color: var(--color-text-secondary);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-indicator.active {
+            background: linear-gradient(135deg, var(--color-success), #059669, #047857);
+            color: white;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Controls Section */
+        .controls-section {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
             font-weight: 600;
-            color: #555;
+            color: var(--color-text);
+            font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.5rem;
         }
 
-        .controls input,
-        .controls select {
-            margin-top: 5px;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
+        .form-input, .form-select {
+            padding: 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            background: var(--gradient-card);
+            color: var(--color-text);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
         }
 
-        .controls input:focus,
-        .controls select:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        [data-theme="dark"] .form-input:focus, 
+        [data-theme="dark"] .form-select:focus {
+            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.15), var(--shadow-md);
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: white;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-accent);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-card);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--color-tertiary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-accent);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--color-error) 0%, #dc2626 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-error);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            filter: brightness(1.1);
         }
 
         .button-group {
             display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 30px;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        button {
-            padding: 15px 30px;
-            font-size: 1em;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #activateBtn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        #activateBtn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        #deactivateBtn {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-        }
-
-        #deactivateBtn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
-        }
-
-        .recommendation {
-            font-size: 3em;
-            font-weight: bold;
-            padding: 40px;
-            margin: 20px 0;
+        /* Recommendation Display */
+        .recommendation-display {
             text-align: center;
-            border-radius: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem 2rem;
+            border-radius: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 1rem 0;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
         }
 
-        .recommendation.LONG {
-            background: linear-gradient(135deg, #4caf50, #8bc34a);
+
+
+        .recommendation-display.LONG {
+            background: linear-gradient(135deg, var(--color-success), #059669, #047857);
             color: white;
-            animation: pulse-green 2s infinite;
+            animation: pulse-success 3s infinite;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
         }
 
-        .recommendation.SHORT {
-            background: linear-gradient(135deg, #f44336, #e91e63);
+        .recommendation-display.SHORT {
+            background: linear-gradient(135deg, var(--color-error), #dc2626, #b91c1c);
             color: white;
-            animation: pulse-red 2s infinite;
+            animation: pulse-error 3s infinite;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
         }
 
-        .recommendation.HOLD {
-            background: linear-gradient(135deg, #ff9800, #ffc107);
+        .recommendation-display.HOLD {
+            background: linear-gradient(135deg, var(--color-warning), #d97706, #b45309);
             color: white;
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
         }
 
-        @keyframes pulse-green {
-
-            0%,
-            100% {
-                box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+        @keyframes pulse-success {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+                transform: scale(1);
             }
-
-            50% {
-                box-shadow: 0 10px 50px rgba(76, 175, 80, 0.6);
-            }
-        }
-
-        @keyframes pulse-red {
-
-            0%,
-            100% {
-                box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 10px 50px rgba(244, 67, 54, 0.6);
+            50% { 
+                box-shadow: 0 0 60px rgba(16, 185, 129, 0.8);
+                transform: scale(1.02);
             }
         }
 
+        @keyframes pulse-error {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 60px rgba(239, 68, 68, 0.8);
+                transform: scale(1.02);
+            }
+        }
+
+        /* Floating Animation for Cards */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .card:nth-child(odd) {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .card:nth-child(even) {
+            animation: float 6s ease-in-out infinite reverse;
+        }
+
+        /* Data Grid */
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
         }
 
-        .data {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--color-border-light);
+            transition: all 0.2s ease;
         }
 
-        .data h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+        .data-item:last-child {
+            border-bottom: none;
         }
 
-        .data p {
-            color: #555;
-            margin: 10px 0;
-            font-size: 1em;
+        .data-item:hover {
+            padding-left: 0.5rem;
+            border-left: 3px solid var(--color-accent);
         }
 
-        .data span {
-            font-weight: 600;
-            color: #667eea;
+        .data-label {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
         }
 
-        .reasoning-box {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        .data-value {
+            font-weight: 700;
+            color: var(--color-text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            text-align: right;
         }
 
-        .reasoning-box h3 {
-            margin-bottom: 10px;
-            color: #333;
+        /* Component Status Table */
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-family: 'Inter', sans-serif;
         }
 
-        .status {
-            text-align: center;
-            padding: 10px;
-            background: #e3f2fd;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-weight: 600;
-            color: #1976d2;
+        .status-table th,
+        .status-table td {
+            padding: 1rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border-light);
+            transition: all 0.2s ease;
         }
 
-        .status.active {
-            background: #c8e6c9;
-            color: #388e3c;
+        .status-table th {
+            font-weight: 700;
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+        }
+
+        .status-table td {
+            color: var(--color-text);
+            font-weight: 500;
+        }
+
+        .status-table tr:hover {
+            background: var(--color-secondary);
+            transform: scale(1.01);
+        }
+
+        .status-table tr:hover td:first-child {
+            border-left: 3px solid var(--color-accent);
+            padding-left: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .dashboard-title {
+                font-size: 1.75rem;
+            }
+
+            .dashboard-main {
+                padding: 1rem;
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendation-display {
+                font-size: 1.75rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .btn {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+
+            .theme-toggle {
+                min-width: 3rem;
+                min-height: 3rem;
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-main {
+                padding: 0.75rem;
+                gap: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .recommendation-display {
+                font-size: 1.5rem;
+                padding: 1.5rem 1rem;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-main {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas: 
+                    "status controls"
+                    "recommendation recommendation"
+                    "data data"
+                    "verification verification"
+                    "simulation simulation"
+                    "rules rules"
+                    "reasoning reasoning";
+            }
+
+            .status-section { grid-area: status; }
+            .controls-section { grid-area: controls; }
+            .recommendation-section { grid-area: recommendation; }
+            .data-section { grid-area: data; }
+            .verification-section { grid-area: verification; }
+            .simulation-section { grid-area: simulation; }
+            .rules-section { grid-area: rules; }
+            .reasoning-section { grid-area: reasoning; }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--color-border);
+            border-radius: 50%;
+            border-top-color: var(--color-accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles for better accessibility */
+        *:focus {
+            outline: 2px solid var(--color-accent);
+            outline-offset: 2px;
         }
     </style>
 </head>
-
 <body>
-    <div class="dashboard">
-        <h1>🚀 VERDICT Trading Dashboard</h1>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">VERIDICT</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <img class="theme-icon" src="icon/light_and_dark.png" alt="Toggle theme" width="20" height="20">
+            </button>
+        </header>
 
-        <div id="status" class="status">Agent Inactive</div>
+        <main class="dashboard-main">
+            <!-- Status Section -->
+            <section class="status-section card">
+                <h2 class="card-title">
+                    <img src="icon/status-update.png" alt="Status" width="20" height="20" class="section-icon">
+                    System Status
+                </h2>
+                <div id="status" class="status-indicator inactive">
+                    Agent Inactive
+                </div>
+            </section>
 
-        <!-- Flare Verification Status Panel -->
-        <div class="verification-panel"
-            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; padding: 20px; margin: 20px 0; color: white;">
-            <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 24px;">🔐</span>
-                Flare Network Verification Status
-            </h3>
+            <!-- Controls Section -->
+            <section class="controls-section card">
+                <h2 class="card-title">
+                    <span>⚙</span>
+                    Trading Controls
+                </h2>
+                <div class="controls-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="token">Token Symbol</label>
+                        <input type="text" id="token" class="form-input" value="BTC" placeholder="e.g., BTC, ETH">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="amount">Portfolio Amount ($)</label>
+                        <input type="number" id="amount" class="form-input" value="1000" min="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="risk">Risk Level</label>
+                        <select id="risk" class="form-select">
+                            <option value="conservative">Conservative</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="aggressive" selected>Aggressive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="activateBtn" class="btn btn-primary">
+                        <span>▶</span>
+                        Activate Agent
+                    </button>
+                    <button id="deactivateBtn" class="btn btn-secondary" disabled>
+                        <span>◼</span>
+                        Deactivate Agent
+                    </button>
+                </div>
+            </section>
 
-            <!-- Component Status Table (Feature 1: Real-Time Component Visualization) -->
-            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">Component Health Status</div>
-                <table style="width: 100%; border-collapse: collapse;">
+            <!-- Recommendation Section -->
+            <section class="recommendation-section">
+                <div id="recommendation" class="recommendation-display HOLD">
+                    Waiting for Activation...
+                </div>
+            </section>
+
+            <!-- Data Section -->
+            <section class="data-section">
+                <div class="data-grid">
+                    <div class="card">
+                        <h3 class="card-title">
+                            <img src="icon/market-data.png" alt="Market Data" width="20" height="20" class="section-icon">
+                            Market Data
+                        </h3>
+                        <div class="data-item">
+                            <span class="data-label">Price</span>
+                            <span id="price" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">24h Change</span>
+                            <span id="change24h" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Volume 24h</span>
+                            <span id="volume" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Market Cap</span>
+                            <span id="marketCap" class="data-value">-</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">
+                            <img src="icon/analysis.png" alt="Analysis" width="20" height="20" class="section-icon">
+                            Analysis
+                        </h3>
+                        <div class="data-item">
+                            <span class="data-label">Confidence</span>
+                            <span id="confidence" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Signal Score</span>
+                            <span id="signalScore" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Sentiment</span>
+                            <span id="sentiment" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Risk Level</span>
+                            <span id="riskLevel" class="data-value">-</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span>◇</span>
+                            Potential PnL
+                        </h3>
+                        <div class="data-item">
+                            <span class="data-label">If +5%</span>
+                            <span id="pnlUp" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">If -5%</span>
+                            <span id="pnlDown" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Leverage</span>
+                            <span id="leverage" class="data-value">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Position Size</span>
+                            <span id="positionSize" class="data-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>        
+    <!-- Verification Section -->
+            <section class="verification-section card">
+                <h2 class="card-title">
+                    <img src="icon/Flare-netwrok-vrification.png" alt="Flare Verification" width="20" height="20" class="section-icon">
+                    Flare Network Verification
+                </h2>
+                <table class="status-table">
                     <thead>
-                        <tr style="border-bottom: 2px solid rgba(255,255,255,0.2);">
-                            <th style="text-align: left; padding: 8px; font-size: 12px;">Component</th>
-                            <th style="text-align: center; padding: 8px; font-size: 12px;">Status</th>
-                            <th style="text-align: right; padding: 8px; font-size: 12px;">Details</th>
+                        <tr>
+                            <th>Component</th>
+                            <th>Status</th>
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <td style="padding: 8px; font-size: 13px;">FTSO Price Feed</td>
-                            <td id="ftso-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳
-                                Checking...</td>
-                            <td id="ftso-details"
-                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <td style="padding: 8px; font-size: 13px;">CMC API</td>
-                            <td id="cmc-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳ Checking...
-                            </td>
-                            <td id="cmc-details"
-                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <td style="padding: 8px; font-size: 13px;">FDC Endpoint</td>
-                            <td id="fdc-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳ Checking...
-                            </td>
-                            <td id="fdc-details"
-                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
+                        <tr>
+                            <td>FTSO Price Feed</td>
+                            <td id="ftso-status">Checking...</td>
+                            <td id="ftso-details">—</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; font-size: 13px;">Contract Log</td>
-                            <td id="contract-status" style="text-align: center; padding: 8px; font-size: 14px;">⏳
-                                Pending...</td>
-                            <td id="contract-details"
-                                style="text-align: right; padding: 8px; font-size: 11px; opacity: 0.8;">—</td>
+                            <td>CMC API</td>
+                            <td id="cmc-status">Checking...</td>
+                            <td id="cmc-details">—</td>
+                        </tr>
+                        <tr>
+                            <td>FDC Endpoint</td>
+                            <td id="fdc-status">Checking...</td>
+                            <td id="fdc-details">—</td>
+                        </tr>
+                        <tr>
+                            <td>Contract Log</td>
+                            <td id="contract-status">Pending...</td>
+                            <td id="contract-details">—</td>
                         </tr>
                     </tbody>
                 </table>
-                <div id="component-overall-status"
-                    style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 5px; text-align: center; font-weight: bold;">
-                    Overall System: <span id="overall-status">⏳ Processing...</span>
+                <div id="component-overall-status" class="status-indicator inactive" style="margin-top: 1rem;">
+                    Overall System: <span id="overall-status">Processing...</span>
                 </div>
-            </div>
-
-            <!-- Original verification badges kept for compatibility -->
-            <div style="display: none;">
-                <div id="verification-details"
-                    style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 12px; display: none;">
-                    <div style="opacity: 0.8;">Verification Hash:</div>
-                    <div id="verification-hash" style="font-family: monospace; word-break: break-all; margin-top: 5px;">
-                    </div>
+                
+                <div style="margin-top: 1rem;">
+                    <button id="connect-wallet-btn" class="btn btn-primary" style="width: 100%;">
+                        <img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg" alt="MetaMask" width="20" height="20" class="metamask-icon">
+                        Connect MetaMask to Flare Coston2
+                    </button>
+                    <div id="wallet-address" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-text-secondary); display: none;"></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- MetaMask Connection -->
-            <div style="margin-top: 15px;">
-                <button id="connect-wallet-btn" onclick="connectMetaMask()"
-                    style="background: #ff6b35; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.3s ease;">
-                    🦊 Connect MetaMask to Flare Coston2
-                </button>
-                <div id="wallet-address" style="margin-top: 10px; font-size: 12px; opacity: 0.8; display: none;"></div>
-            </div>
-        </div>
+            <!-- Attack Simulation Section -->
+            <section class="simulation-section card">
+                <h2 class="card-title">
+                    <img src="icon/warning.png" alt="Warning" width="20" height="20" class="section-icon">
+                    Attack Simulation (Demo)
+                </h2>
+                <div class="button-group">
+                    <button id="simulateAttackBtn" class="btn btn-danger">
+                        <img src="icon/warning.png" alt="Warning" width="16" height="16" class="button-icon">
+                        Simulate Price Attack
+                    </button>
+                    <button id="resetSimulationBtn" class="btn btn-secondary" disabled>
+                        <img src="icon/reset.png" alt="Reset" width="16" height="16" class="button-icon">
+                        Reset to Normal
+                    </button>
+                </div>
+                <div id="attack-info" class="card" style="margin-top: 1rem; display: none; background: var(--color-error); color: white;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;"><img src="icon/warning.png" alt="Warning" width="16" height="16" style="filter: brightness(0) invert(1); margin-right: 0.5rem;"> ATTACK MODE ACTIVE</div>
+                    <div id="attack-details" style="font-size: 0.875rem; line-height: 1.5;"></div>
+                </div>
+            </section>
 
-        <div class="controls">
-            <label>
-                Token Symbol
-                <input type="text" id="token" value="BTC" placeholder="e.g., BTC, ETH">
-            </label>
-            <label>
-                Portfolio Amount ($)
-                <input type="number" id="amount" value="1000" min="10">
-            </label>
-            <label>
-                Risk Level
-                <select id="risk">
-                    <option value="conservative">Conservative</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="aggressive" selected>Aggressive</option>
-                </select>
-            </label>
-        </div>
-
-        <div class="button-group">
-            <button id="activateBtn">🚀 Activate Agent</button>
-            <button id="deactivateBtn" disabled>⏹️ Deactivate Agent</button>
-        </div>
-
-        <!-- Feature 2: Attack Simulation Controls -->
-        <div id="attack-simulation-panel"
-            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 15px; padding: 20px; margin: 20px 0; color: white;">
-            <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 24px;">⚠️</span>
-                Attack Simulation (Demo)
-            </h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <button id="simulateAttackBtn"
-                    style="background: #ff4757; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;">
-                    💣 Simulate Price Attack
-                </button>
-                <button id="resetSimulationBtn" disabled
-                    style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; flex: 1; min-width: 150px;">
-                    🔄 Reset to Normal
-                </button>
-            </div>
-            <div id="attack-info"
-                style="margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; display: none;">
-                <div style="font-weight: bold; margin-bottom: 8px;">🚨 ATTACK MODE ACTIVE</div>
-                <div id="attack-details" style="font-size: 13px; line-height: 1.5;"></div>
-            </div>
-        </div>
-
-        <!-- Feature 3: Rules Engine Viewer -->
-        <details id="rules-panel" style="background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 20px 0;">
-            <summary style="cursor: pointer; font-weight: bold; font-size: 1.2em; color: #333;">
-                📋 Verification Rules Engine (Click to expand)
-            </summary>
-            <div style="margin-top: 15px;">
-                <div id="rules-summary"
-                    style="padding: 10px; background: #e3f2fd; border-radius: 8px; margin-bottom: 15px; color: #1976d2;">
+            <!-- Rules Engine Section -->
+            <section class="rules-section card">
+                <h2 class="card-title">
+                    <img src="icon/rules.png" alt="Rules" width="20" height="20" class="section-icon">
+                    Verification Rules Engine
+                </h2>
+                <div id="rules-summary" class="status-indicator inactive" style="margin-bottom: 1rem;">
                     Loading rules...
                 </div>
-                <div id="rules-list" style="display: grid; gap: 10px;">
+                <div id="rules-list" style="display: grid; gap: 0.75rem;">
                     <!-- Rules will be populated here by JavaScript -->
                 </div>
-            </div>
-        </details>
+            </section>
 
-        <div id="recommendation" class="recommendation HOLD">Waiting for Activation...</div>
-
-        <div class="data-grid">
-            <div class="data">
-                <h3>💰 Market Data</h3>
-                <p>Price: <span id="price">-</span></p>
-                <p>24h Change: <span id="change24h">-</span></p>
-                <p>Volume 24h: <span id="volume">-</span></p>
-                <p>Market Cap: <span id="marketCap">-</span></p>
-            </div>
-
-            <div class="data">
-                <h3>📊 Analysis</h3>
-                <p>Confidence: <span id="confidence">-</span></p>
-                <p>Signal Score: <span id="signalScore">-</span></p>
-                <p>Sentiment: <span id="sentiment">-</span></p>
-                <p>Risk Level: <span id="riskLevel">-</span></p>
-            </div>
-
-            <div class="data">
-                <h3>💵 Potential PnL</h3>
-                <p>If +5%: <span id="pnlUp">-</span></p>
-                <p>If -5%: <span id="pnlDown">-</span></p>
-                <p>Leverage: <span id="leverage">-</span></p>
-                <p>Position Size: <span id="positionSize">-</span></p>
-            </div>
-        </div>
-
-        <div class="reasoning-box">
-            <h3>🤖 AI Reasoning</h3>
-            <p id="reasoning">Waiting for data...</p>
-        </div>
+            <!-- AI Reasoning Section -->
+            <section class="reasoning-section card">
+                <h2 class="card-title">
+                    <span>◉</span>
+                    AI Reasoning
+                </h2>
+                <p id="reasoning" style="color: var(--color-text-secondary); line-height: 1.6;">
+                    Waiting for data...
+                </p>
+            </section>
+        </main>
     </div>
 
     <script>
+        // Theme Management System
+        class ThemeManager {
+            constructor() {
+                this.currentTheme = localStorage.getItem('theme') || 
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                this.init();
+            }
+
+            init() {
+                this.applyTheme(this.currentTheme);
+                this.bindEvents();
+                this.updateToggleIcon();
+            }
+
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                this.currentTheme = theme;
+                localStorage.setItem('theme', theme);
+                this.updateToggleIcon();
+            }
+
+            toggleTheme() {
+                const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                this.applyTheme(newTheme);
+            }
+
+            updateToggleIcon() {
+                // Icon styling is handled by CSS based on data-theme attribute
+                // No need to update icon content since we're using an image
+            }
+
+            bindEvents() {
+                const toggleBtn = document.getElementById('theme-toggle');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => this.toggleTheme());
+                }
+
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (!localStorage.getItem('theme')) {
+                        this.applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+        }
+
+        // Initialize theme manager
+        const themeManager = new ThemeManager();
+
+        // Existing API and functionality code
         const API_URL = 'http://localhost:8000/api';
         let pollingInterval = null;
 
@@ -429,6 +1047,9 @@
             }
 
             try {
+                activateBtn.classList.add('loading');
+                activateBtn.innerHTML = '<span class="spinner"></span> Activating...';
+
                 const response = await fetch(`${API_URL}/activate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -441,18 +1062,21 @@
                 });
 
                 const data = await response.json();
-                console.log('✅ Activated:', data);
+                console.log('● Activated:', data);
 
                 activateBtn.disabled = true;
                 deactivateBtn.disabled = false;
                 statusDiv.textContent = `Agent Active - Analyzing ${token}`;
-                statusDiv.className = 'status active';
+                statusDiv.className = 'status-indicator active';
 
                 // Start polling
                 startPolling(token, amount, risk);
             } catch (error) {
-                console.error('❌ Activation error:', error);
+                console.error('◆ Activation error:', error);
                 alert('Failed to activate agent. Make sure the server is running on port 8000.');
+            } finally {
+                activateBtn.classList.remove('loading');
+                activateBtn.innerHTML = '<span>▶</span> Activate Agent';
             }
         });
 
@@ -468,6 +1092,9 @@
             }
 
             try {
+                deactivateBtn.classList.add('loading');
+                deactivateBtn.innerHTML = '<span class="spinner"></span> Deactivating...';
+
                 const response = await fetch(`${API_URL}/deactivate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -479,14 +1106,17 @@
                 });
 
                 const data = await response.json();
-                console.log('⏹️ Deactivated:', data);
+                console.log('◼ Deactivated:', data);
 
                 activateBtn.disabled = false;
                 deactivateBtn.disabled = true;
                 statusDiv.textContent = 'Agent Inactive';
-                statusDiv.className = 'status';
+                statusDiv.className = 'status-indicator inactive';
             } catch (error) {
-                console.error('❌ Deactivation error:', error);
+                console.error('◆ Deactivation error:', error);
+            } finally {
+                deactivateBtn.classList.remove('loading');
+                deactivateBtn.innerHTML = '<span>◼</span> Deactivate Agent';
             }
         });
 
@@ -518,22 +1148,16 @@
                 const data = await response.json();
                 updateUI(data);
             } catch (error) {
-                console.error('📡 Polling error:', error);
+                console.error('◯ Polling error:', error);
             }
         }
 
         // Update UI with data
         function updateUI(data) {
-            // Recommendation with explanation
+            // Recommendation
             const recDiv = document.getElementById('recommendation');
-            const meanings = {
-                'LONG': '📈 BUY / ENTER POSITION',
-                'SHORT': '📉 SELL / EXIT POSITION',
-                'HOLD': '⏸️ WAIT / NO ACTION'
-            };
-            const actionText = meanings[data.recommendation] || '';
-            recDiv.innerHTML = `${data.recommendation}<div style="font-size: 0.4em; margin-top: 10px; opacity: 0.9;">${actionText}</div>`;
-            recDiv.className = `recommendation ${data.recommendation}`;
+            recDiv.textContent = data.recommendation;
+            recDiv.className = `recommendation-display ${data.recommendation}`;
 
             // Market data
             document.getElementById('price').textContent = `$${formatNumber(data.market_data.price)}`;
@@ -558,17 +1182,15 @@
             // Reasoning
             document.getElementById('reasoning').textContent = data.reasoning;
 
-            // Update component status (Feature 1)
+            // Update component status
             updateComponentStatus(data);
 
-            // Update rules evaluation (Feature 3)
+            // Update rules evaluation
             updateRulesDisplay(data);
         }
 
-        // ========== FEATURE 1: Component Status Visualization ==========
-
+        // Component Status Visualization
         function updateComponentStatus(data) {
-            // If component_status is available in the data
             if (data.component_status && data.component_status.components) {
                 const components = data.component_status.components;
 
@@ -612,27 +1234,26 @@
 
         function getStatusBadge(status) {
             const badges = {
-                'healthy': '✅ Healthy',
-                'warning': '⚠️ Warning',
-                'error': '❌ Error',
-                'offline': '❌ Offline',
-                'unknown': '❓ Unknown'
+                'healthy': 'Healthy',
+                'warning': 'Warning',
+                'error': 'Error',
+                'offline': 'Offline',
+                'unknown': 'Unknown'
             };
             return badges[status] || status;
         }
 
         function getOverallStatusBadge(status) {
             const badges = {
-                'healthy': '✅ Fully Operational',
-                'degraded': '⚠️ Degraded',
-                'critical': '❌ Critical',
-                'offline': '❌ System Offline'
+                'healthy': 'Fully Operational',
+                'degraded': 'Degraded',
+                'critical': 'Critical',
+                'offline': 'System Offline'
             };
             return badges[status] || status;
         }
 
-        // ========== FEATURE 2: Attack Simulation ==========
-
+        // Attack Simulation
         let attackModeActive = false;
 
         document.getElementById('simulateAttackBtn').addEventListener('click', async () => {
@@ -641,8 +1262,9 @@
             const risk = document.getElementById('risk').value;
 
             try {
-                document.getElementById('simulateAttackBtn').disabled = true;
-                document.getElementById('simulateAttackBtn').textContent = '⏳ Simulating...';
+                const btn = document.getElementById('simulateAttackBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner"></span> Simulating...';
 
                 const response = await fetch(`${API_URL}/simulate-attack`, {
                     method: 'POST',
@@ -657,22 +1279,22 @@
                 });
 
                 const result = await response.json();
-                console.log('💣 Attack simulated:', result);
+                console.log('◆ Attack simulated:', result);
 
                 // Show attack info
                 document.getElementById('attack-info').style.display = 'block';
 
                 let detailsHtml = `
-                    <div style="margin-bottom: 8px;"><strong>Attack Type:</strong> ${result.attack_info.description}</div>
-                    <div style="margin-bottom: 8px;"><strong>Original Price:</strong> $${result.original_price.toFixed(2)}</div>
-                    <div style="margin-bottom: 8px;"><strong>Tampered Price:</strong> $${result.tampered_price.toFixed(2)}</div>
-                    <div style="margin-bottom: 8px;"><strong>Verification:</strong> ❌ <span style="color: #ff6b6b;">FAILED - Data Tampering Detected!</span></div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Attack Type:</strong> ${result.attack_info.description}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Original Price:</strong> $${result.original_price.toFixed(2)}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Tampered Price:</strong> $${result.tampered_price.toFixed(2)}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Verification:</strong> ◆ FAILED - Data Tampering Detected!</div>
                 `;
 
                 if (result.attack_info.tampering_details && result.attack_info.tampering_details.length > 0) {
-                    detailsHtml += `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);"><strong>Detection Details:</strong></div>`;
+                    detailsHtml += `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.2);"><strong>Detection Details:</strong></div>`;
                     result.attack_info.tampering_details.forEach(detail => {
-                        detailsHtml += `<div style="margin-top: 5px; font-size: 12px;">• ${detail.detection || detail.method}</div>`;
+                        detailsHtml += `<div style="margin-top: 0.25rem; font-size: 0.8rem;">• ${detail.detection || detail.method}</div>`;
                     });
                 }
 
@@ -680,16 +1302,16 @@
 
                 // Enable reset button
                 document.getElementById('resetSimulationBtn').disabled = false;
-                document.getElementById('resetSimulationBtn').style.background = '#4caf50';
-                document.getElementById('simulateAttackBtn').textContent = '💣 Attack Active';
+                btn.innerHTML = '<img src="icon/warning.png" alt="Warning" width="16" height="16" class="button-icon"> Attack Active';
 
                 attackModeActive = true;
 
             } catch (error) {
-                console.error('❌ Attack simulation error:', error);
+                console.error('◆ Attack simulation error:', error);
                 alert('Failed to simulate attack');
-                document.getElementById('simulateAttackBtn').disabled = false;
-                document.getElementById('simulateAttackBtn').textContent = '💣 Simulate Price Attack';
+                const btn = document.getElementById('simulateAttackBtn');
+                btn.disabled = false;
+                btn.innerHTML = '<img src="icon/warning.png" alt="Warning" width="16" height="16" class="button-icon"> Simulate Price Attack';
             }
         });
 
@@ -701,26 +1323,24 @@
                 });
 
                 const result = await response.json();
-                console.log('🔄 Simulation reset:', result);
+                console.log('◯ Simulation reset:', result);
 
                 // Hide attack info
                 document.getElementById('attack-info').style.display = 'none';
 
                 // Reset buttons
                 document.getElementById('simulateAttackBtn').disabled = false;
-                document.getElementById('simulateAttackBtn').textContent = '💣 Simulate Price Attack';
+                document.getElementById('simulateAttackBtn').innerHTML = '<img src="icon/warning.png" alt="Warning" width="16" height="16" class="button-icon"> Simulate Price Attack';
                 document.getElementById('resetSimulationBtn').disabled = true;
-                document.getElementById('resetSimulationBtn').style.background = 'rgba(255,255,255,0.3)';
 
                 attackModeActive = false;
 
             } catch (error) {
-                console.error('❌ Reset error:', error);
+                console.error('◆ Reset error:', error);
             }
         });
 
-        // ========== FEATURE 3: Rules Engine Viewer ==========
-
+        // Rules Engine Viewer
         async function loadRulesEngine() {
             try {
                 const response = await fetch(`${API_URL}/rules`);
@@ -741,23 +1361,24 @@
                 if (rulesData.rules && rulesData.rules.length > 0) {
                     rulesData.rules.forEach(rule => {
                         const ruleDiv = document.createElement('div');
-                        ruleDiv.style.cssText = 'padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #667eea;';
+                        ruleDiv.className = 'card';
+                        ruleDiv.style.padding = '1rem';
 
                         const severityColor = {
-                            'critical': '#f44336',
-                            'high': '#ff9800',
-                            'medium': '#ffc107',
-                            'low': '#4caf50'
-                        }[rule.severity] || '#999';
+                            'critical': 'var(--color-error)',
+                            'high': 'var(--color-warning)',
+                            'medium': 'var(--color-info)',
+                            'low': 'var(--color-success)'
+                        }[rule.severity] || 'var(--color-text-muted)';
 
                         ruleDiv.innerHTML = `
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 5px;">
-                                <strong style="color: #333;">${rule.name}</strong>
-                                <span style="background: ${severityColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase;">${rule.severity}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <strong style="color: var(--color-text);">${rule.name}</strong>
+                                <span style="background: ${severityColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; text-transform: uppercase;">${rule.severity}</span>
                             </div>
-                            <div style="font-size: 13px; color: #666; margin-bottom: 5px;">${rule.description}</div>
-                            <div style="font-size: 12px; color: #999;">
-                                <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px;">${rule.condition}</code>
+                            <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">${rule.description}</div>
+                            <div style="font-size: 0.75rem; color: var(--color-text-muted);">
+                                <code style="background: var(--color-secondary); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">${rule.condition}</code>
                             </div>
                         `;
 
@@ -766,7 +1387,7 @@
                 }
 
             } catch (error) {
-                console.error('❌ Error loading rules:', error);
+                console.error('◆ Error loading rules:', error);
                 document.getElementById('rules-summary').textContent = 'Error loading rules';
             }
         }
@@ -781,23 +1402,24 @@
                 const totalCount = rulesEval.rules_evaluated || 0;
                 const status = rulesEval.overall_status;
 
-                let statusColor = '#4caf50';
-                let statusText = '✅ All Rules Passed';
+                let statusClass = 'inactive';
+                let statusText = '● All Rules Passed';
 
                 if (status === 'critical_failure' || status === 'blocked') {
-                    statusColor = '#f44336';
-                    statusText = '❌ Critical Rules Failed';
+                    statusClass = 'inactive';
+                    statusText = '◆ Critical Rules Failed';
                 } else if (status === 'warnings') {
-                    statusColor = '#ff9800';
-                    statusText = '⚠️ Some Warnings';
+                    statusClass = 'inactive';
+                    statusText = '△ Some Warnings';
+                } else {
+                    statusClass = 'active';
                 }
 
+                summaryEl.className = `status-indicator ${statusClass}`;
                 summaryEl.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div><strong>Rules Status:</strong> ${passedCount}/${totalCount} Passed</div>
-                        <div style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: bold;">
-                            ${statusText}
-                        </div>
+                        <div>${statusText}</div>
                     </div>
                 `;
 
@@ -808,18 +1430,17 @@
 
                     rulesEval.results.forEach(result => {
                         const ruleDiv = document.createElement('div');
-                        const borderColor = result.passed ? '#4caf50' : '#f44336';
-                        const bgColor = result.passed ? '#f1f8f4' : '#fff5f5';
-
-                        ruleDiv.style.cssText = `padding: 12px; background: ${bgColor}; border-radius: 8px; border-left: 4px solid ${borderColor};`;
+                        ruleDiv.className = 'card';
+                        const bgColor = result.passed ? 'var(--color-success)' : 'var(--color-error)';
+                        ruleDiv.style.cssText = `padding: 1rem; border-left: 4px solid ${bgColor};`;
 
                         ruleDiv.innerHTML = `
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <strong style="color: #333;">${result.rule_name}</strong>
-                                <span style="font-size: 18px;">${result.passed ? '✅' : '❌'}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <strong style="color: var(--color-text);">${result.rule_name}</strong>
+                                <span style="font-size: 1.25rem;">${result.passed ? '●' : '◆'}</span>
                             </div>
-                            ${!result.passed && result.message ? `<div style="font-size: 13px; color: #d32f2f; font-weight: 500;">⚠️ ${result.message}</div>` : ''}
-                            <div style="font-size: 11px; color: #999; margin-top: 5px;">Type: ${result.type} | Severity: ${result.severity}</div>
+                            ${!result.passed && result.message ? `<div style="font-size: 0.875rem; color: var(--color-error); font-weight: 500;">△ ${result.message}</div>` : ''}
+                            <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.5rem;">Type: ${result.type} | Severity: ${result.severity}</div>
                         `;
 
                         rulesList.appendChild(ruleDiv);
@@ -828,11 +1449,6 @@
             }
         }
 
-        // Load rules on page load
-        loadRulesEngine();
-
-        // ========== Flare Network Integration ==========
-
         // MetaMask and Flare Integration
         let web3;
         let userAccount;
@@ -840,6 +1456,10 @@
         async function connectMetaMask() {
             if (typeof window.ethereum !== 'undefined') {
                 try {
+                    const btn = document.getElementById('connect-wallet-btn');
+                    btn.classList.add('loading');
+                    btn.innerHTML = '<span class="spinner"></span> Connecting...';
+
                     // Request account access
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     userAccount = accounts[0];
@@ -871,85 +1491,28 @@
                     }
 
                     // Update UI
-                    document.getElementById('connect-wallet-btn').textContent = '✅ Connected to Coston2';
-                    document.getElementById('connect-wallet-btn').style.background = '#4caf50';
+                    btn.innerHTML = '<img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg" alt="MetaMask" width="20" height="20" class="metamask-icon"> Connected to Coston2';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
                     document.getElementById('wallet-address').textContent = `Wallet: ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
                     document.getElementById('wallet-address').style.display = 'block';
 
-                    console.log('✅ Connected to Flare Coston2:', userAccount);
+                    console.log('● Connected to Flare Coston2:', userAccount);
 
                 } catch (error) {
-                    console.error('❌ MetaMask connection failed:', error);
+                    console.error('◆ MetaMask connection failed:', error);
                     alert('Failed to connect MetaMask. Please try again.');
+                    const btn = document.getElementById('connect-wallet-btn');
+                    btn.classList.remove('loading');
+                    btn.innerHTML = '<img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg" alt="MetaMask" width="20" height="20" class="metamask-icon"> Connect MetaMask to Flare Coston2';
                 }
             } else {
                 alert('MetaMask is not installed! Please install it from https://metamask.io');
             }
         }
 
-        // Update verification status display
-        function updateVerificationStatus(data) {
-            // Debug: log verification data
-            console.log('🔍 Updating verification status with data:', {
-                ftso_price: data.ftso_price,
-                fdc_verified: data.fdc_verified,
-                contract_verified: data.contract_verified,
-                verified: data.verified,
-                verification_hash: data.verification_hash
-            });
-
-            // FTSO Status
-            const ftsoStatus = document.getElementById('ftso-status');
-            if (data.ftso_price && data.ftso_price > 0) {
-                ftsoStatus.innerHTML = '✅ Verified<br><span style="font-size:14px;opacity:0.9;">$' + data.ftso_price.toFixed(2) + '</span>';
-                console.log('✅ FTSO Status: Verified - $' + data.ftso_price.toFixed(2));
-            } else {
-                ftsoStatus.innerHTML = '❌ Not Available';
-                console.log('❌ FTSO Status: Not Available');
-            }
-
-            // FDC Status
-            const fdcStatus = document.getElementById('fdc-status');
-            if (data.fdc_verified) {
-                fdcStatus.innerHTML = '✅ Data Verified';
-                console.log('✅ FDC Status: Verified');
-            } else {
-                fdcStatus.innerHTML = '⚠️ Unverified';
-                console.log('⚠️ FDC Status: Unverified');
-            }
-
-            // Contract Status
-            const contractStatus = document.getElementById('contract-status');
-            if (data.contract_verified === true) {
-                contractStatus.innerHTML = '✅ Verified On-Chain';
-                console.log('✅ Contract Status: Verified On-Chain');
-            } else if (data.contract_verified === false) {
-                contractStatus.innerHTML = '❌ Failed';
-                console.log('❌ Contract Status: Failed');
-            } else {
-                contractStatus.innerHTML = '⏸️ Pending';
-                console.log('⏸️ Contract Status: Pending');
-            }
-
-            // Overall Status
-            const overallStatus = document.getElementById('overall-status');
-            if (data.verified) {
-                overallStatus.innerHTML = '✅ Fully Verified';
-                overallStatus.style.color = '#4caf50';
-                console.log('✅ Overall Status: Fully Verified');
-            } else {
-                overallStatus.innerHTML = '⚠️ Partial';
-                overallStatus.style.color = '#ff9800';
-                console.log('⚠️ Overall Status: Partial');
-            }
-
-            // Show verification hash if available
-            if (data.verification_hash) {
-                document.getElementById('verification-details').style.display = 'block';
-                document.getElementById('verification-hash').textContent = data.verification_hash;
-                console.log('🔐 Verification Hash:', data.verification_hash.substring(0, 16) + '...');
-            }
-        }
+        // Bind MetaMask connection
+        document.getElementById('connect-wallet-btn').addEventListener('click', connectMetaMask);
 
         // Auto-connect if previously connected
         window.addEventListener('load', async () => {
@@ -959,12 +1522,16 @@
                     userAccount = accounts[0];
                     document.getElementById('wallet-address').textContent = `Wallet: ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
                     document.getElementById('wallet-address').style.display = 'block';
-                    document.getElementById('connect-wallet-btn').textContent = '✅ Wallet Connected';
-                    document.getElementById('connect-wallet-btn').style.background = '#4caf50';
+                    const btn = document.getElementById('connect-wallet-btn');
+                    btn.innerHTML = '<img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg" alt="MetaMask" width="20" height="20" class="metamask-icon"> Wallet Connected';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
                 }
             }
         });
+
+        // Load rules on page load
+        loadRulesEngine();
     </script>
 </body>
-
 </html>

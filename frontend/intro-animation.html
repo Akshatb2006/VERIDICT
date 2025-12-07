@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERIDICT - Loading</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #00f5ff;
+            overflow: hidden;
+        }
+
+        /* Intro Overlay */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #intro-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Content after intro */
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .content.visible {
+            opacity: 1;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(0, 245, 255, 0.5);
+        }
+
+        p {
+            font-size: 1.5rem;
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        .replay-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #000;
+            background: linear-gradient(135deg, #00f5ff, #14f195);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .replay-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(0, 245, 255, 0.5);
+        }
+
+        .info {
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(0, 245, 255, 0.05);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 15px;
+            max-width: 600px;
+        }
+
+        .info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #14f195;
+        }
+
+        .info ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+
+        .info li {
+            padding: 8px 0;
+            color: #888;
+            border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+        }
+
+        .info li:last-child {
+            border-bottom: none;
+        }
+
+        .info code {
+            background: rgba(0, 245, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #00f5ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Sequence Overlay -->
+    <div id="intro-overlay" class="intro-overlay">
+        <canvas id="intro-canvas"></canvas>
+    </div>
+
+    <!-- Content After Intro (Hidden - will redirect) -->
+    <div id="content" class="content" style="display: none;">
+        <h1>VERIDICT</h1>
+        <p>Loading...</p>
+    </div>
+
+    <script>
+        // CINEMATIC INTRO SEQUENCE
+        // Self-contained particle animation system
+        
+        class IntroSequence {
+            constructor(canvas, onComplete) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.onComplete = onComplete;
+                this.particles = [];
+                this.animationFrame = null;
+                this.startTime = null;
+                
+                // Set canvas size
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                // Center point
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+                
+                // Lock scroll during intro
+                document.body.style.overflow = 'hidden';
+            }
+
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+            }
+
+            start() {
+                console.log('🎬 Starting intro sequence...');
+                this.startTime = Date.now();
+                this.createParticles();
+                this.animate();
+            }
+
+            createParticles() {
+                // Create 75 particles (green and cyan)
+                const particleCount = 75;
+                const colors = [
+                    '#00ff41', // Green
+                    '#00cc33', // Green secondary
+                    '#00f5ff', // Cyan
+                    '#00d9ff', // Cyan secondary
+                    '#14f195', // Teal
+                ];
+
+                for (let i = 0; i < particleCount; i++) {
+                    // Random position around the edges
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.max(this.canvas.width, this.canvas.height) * 0.7;
+                    
+                    this.particles.push({
+                        x: this.centerX + Math.cos(angle) * distance,
+                        y: this.centerY + Math.sin(angle) * distance,
+                        targetX: this.centerX,
+                        targetY: this.centerY,
+                        angle: angle,
+                        distance: distance,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 3 + 2,
+                        speed: Math.random() * 0.5 + 0.5,
+                        opacity: 0
+                    });
+                }
+            }
+
+            animate() {
+    const elapsed = (Date.now() - this.startTime) / 1000; // seconds
+
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Phase 1: Particles spiral inward (0–1.2s)
+    if (elapsed < 1.2) {
+        this.animateParticles(elapsed / (1.2 / 2)); // speed adjust
+    }
+    // Phase 2: Fuse (1.2–2.0s)
+    else if (elapsed < 2.0) {
+        this.fuseParticles((elapsed - 1.2) / 0.8);
+    }
+    // Phase 3: Burst (2.0–2.4s)
+    else if (elapsed < 2.2) {
+        this.burstEffect((elapsed - 2.0) / 0.4);
+    }
+    // Phase 4: Fade to black (2.4–2.7s)
+    // else if (elapsed < 2.7) {
+    //     let fade = (elapsed - 2.4) / 0.3;
+    //     this.ctx.fillStyle = `rgba(0,0,0,${fade})`;
+    //     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // }
+    // Phase 5: Finish quickly
+    else {
+        this.unlockScroll();
+        return;
+    }
+
+    this.animationFrame = requestAnimationFrame(() => this.animate());
+}
+
+
+            animateParticles(elapsed) {
+                // Fade in particles and move them in spiral
+                this.particles.forEach(particle => {
+                    // Fade in
+                    particle.opacity = Math.min(elapsed / 0.5, 1);
+                    
+                    // Spiral inward
+                    const progress = elapsed / 2;
+                    const spiralAngle = particle.angle + progress * Math.PI * 4; // 2 full rotations
+                    const currentDistance = particle.distance * (1 - progress);
+                    
+                    particle.x = this.centerX + Math.cos(spiralAngle) * currentDistance;
+                    particle.y = this.centerY + Math.sin(spiralAngle) * currentDistance;
+                    
+                    // Draw particle
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fillStyle = particle.color + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
+                    this.ctx.fill();
+                    
+                    // Add glow
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowColor = particle.color;
+                    this.ctx.fill();
+                    this.ctx.shadowBlur = 0;
+                });
+            }
+
+            fuseParticles(elapsed) {
+                // All particles converge to center
+                const progress = elapsed / 1; // 1 second duration
+                
+                this.particles.forEach(particle => {
+                    // Move to center
+                    particle.x = this.centerX;
+                    particle.y = this.centerY;
+                    
+                    // Draw particle
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size * (1 - progress * 0.5), 0, Math.PI * 2);
+                    this.ctx.fillStyle = particle.color + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
+                    this.ctx.fill();
+                    
+                    // Increase glow as they fuse
+                    this.ctx.shadowBlur = 20 * progress;
+                    this.ctx.shadowColor = particle.color;
+                    this.ctx.fill();
+                    this.ctx.shadowBlur = 0;
+                });
+                
+                // Draw bright center point
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 5 + progress * 10, 0, Math.PI * 2);
+                const gradient = this.ctx.createRadialGradient(
+                    this.centerX, this.centerY, 0,
+                    this.centerX, this.centerY, 15 + progress * 10
+                );
+                gradient.addColorStop(0, '#ffffff');
+                gradient.addColorStop(0.5, '#00f5ff');
+                gradient.addColorStop(1, 'transparent');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fill();
+            }
+
+            burstEffect(elapsed) {
+                // Subtle burst from center
+                const progress = elapsed / 0.5; // 0.5 second duration
+                const radius = progress * 150;
+                const opacity = 1 - progress;
+                
+                // Draw expanding ring
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, radius, 0, Math.PI * 2);
+                this.ctx.strokeStyle = `rgba(0, 245, 255, ${opacity * 0.5})`;
+                this.ctx.lineWidth = 3;
+                this.ctx.stroke();
+                
+                // Draw inner glow
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 20, 0, Math.PI * 2);
+                const gradient = this.ctx.createRadialGradient(
+                    this.centerX, this.centerY, 0,
+                    this.centerX, this.centerY, 40
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+                gradient.addColorStop(0.5, `rgba(0, 245, 255, ${opacity * 0.5})`);
+                gradient.addColorStop(1, 'transparent');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fill();
+            }
+
+          
+                
+             
+
+            unlockScroll() {
+                console.log('✅ Intro sequence complete');
+                
+                // Stop animation
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                }
+                
+                // Unlock scroll
+                document.body.style.overflow = '';
+                
+                // Call completion callback
+                if (this.onComplete) {
+                    this.onComplete();
+                }
+                
+                // Redirect to index.html after animation completes
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 100);
+            }
+        }
+
+        // Initialize on page load
+        let introSequence;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            startIntro();
+        });
+
+        function startIntro() {
+            const introOverlay = document.getElementById('intro-overlay');
+            const introCanvas = document.getElementById('intro-canvas');
+            const content = document.getElementById('content');
+            
+            // Show overlay
+            introOverlay.classList.remove('hidden');
+            content.classList.remove('visible');
+            
+            // Create and start intro sequence
+            introSequence = new IntroSequence(introCanvas, () => {
+                // On complete - fade out overlay and show content
+                setTimeout(() => {
+                    introOverlay.classList.add('hidden');
+                    content.classList.add('visible');
+                }, 500);
+            });
+            
+            introSequence.start();
+        }
+
+        function replayIntro() {
+            startIntro();
+        }
+    </script>
+</body>
+</html>
