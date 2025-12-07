@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +34,7 @@
             --gradient-card: linear-gradient(145deg, #ffffff 0%, #faf7ff 50%, #f3f0ff 100%);
             --gradient-accent: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
             --texture-overlay: linear-gradient(135deg, rgba(139, 92, 246, 0.02) 0%, transparent 30%),
-                              linear-gradient(45deg, rgba(167, 139, 250, 0.01) 0%, transparent 50%);
+                linear-gradient(45deg, rgba(167, 139, 250, 0.01) 0%, transparent 50%);
         }
 
         /* Dark Theme Variables - Black-Grey-Purple Aesthetic */
@@ -60,7 +61,7 @@
             --gradient-card: linear-gradient(145deg, #111111 0%, #1a1a1a 50%, #1e1b2e 100%);
             --gradient-accent: linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #7c3aed 100%);
             --texture-overlay: linear-gradient(135deg, rgba(168, 85, 247, 0.03) 0%, transparent 40%),
-                              linear-gradient(45deg, rgba(46, 27, 78, 0.05) 0%, transparent 60%);
+                linear-gradient(45deg, rgba(46, 27, 78, 0.05) 0%, transparent 60%);
         }
 
         /* Global Styles and Reset */
@@ -338,7 +339,8 @@
             margin-bottom: 0.5rem;
         }
 
-        .form-input, .form-select {
+        .form-input,
+        .form-select {
             padding: 1rem;
             border: 1px solid var(--color-border);
             border-radius: 0.75rem;
@@ -350,14 +352,15 @@
             box-shadow: var(--shadow-sm);
         }
 
-        .form-input:focus, .form-select:focus {
+        .form-input:focus,
+        .form-select:focus {
             outline: none;
             border-color: var(--color-accent);
             box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), var(--shadow-md);
             transform: translateY(-1px);
         }
 
-        [data-theme="dark"] .form-input:focus, 
+        [data-theme="dark"] .form-input:focus,
         [data-theme="dark"] .form-select:focus {
             box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.15), var(--shadow-md);
         }
@@ -488,22 +491,28 @@
         }
 
         @keyframes pulse-success {
-            0%, 100% { 
+
+            0%,
+            100% {
                 box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
                 transform: scale(1);
             }
-            50% { 
+
+            50% {
                 box-shadow: 0 0 60px rgba(16, 185, 129, 0.8);
                 transform: scale(1.02);
             }
         }
 
         @keyframes pulse-error {
-            0%, 100% { 
+
+            0%,
+            100% {
                 box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
                 transform: scale(1);
             }
-            50% { 
+
+            50% {
                 box-shadow: 0 0 60px rgba(239, 68, 68, 0.8);
                 transform: scale(1.02);
             }
@@ -511,8 +520,15 @@
 
         /* Floating Animation for Cards */
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
         }
 
         .card:nth-child(odd) {
@@ -676,7 +692,7 @@
         @media (min-width: 1024px) {
             .dashboard-main {
                 grid-template-columns: 1fr 1fr;
-                grid-template-areas: 
+                grid-template-areas:
                     "status controls"
                     "recommendation recommendation"
                     "data data"
@@ -686,14 +702,37 @@
                     "reasoning reasoning";
             }
 
-            .status-section { grid-area: status; }
-            .controls-section { grid-area: controls; }
-            .recommendation-section { grid-area: recommendation; }
-            .data-section { grid-area: data; }
-            .verification-section { grid-area: verification; }
-            .simulation-section { grid-area: simulation; }
-            .rules-section { grid-area: rules; }
-            .reasoning-section { grid-area: reasoning; }
+            .status-section {
+                grid-area: status;
+            }
+
+            .controls-section {
+                grid-area: controls;
+            }
+
+            .recommendation-section {
+                grid-area: recommendation;
+            }
+
+            .data-section {
+                grid-area: data;
+            }
+
+            .verification-section {
+                grid-area: verification;
+            }
+
+            .simulation-section {
+                grid-area: simulation;
+            }
+
+            .rules-section {
+                grid-area: rules;
+            }
+
+            .reasoning-section {
+                grid-area: reasoning;
+            }
         }
 
         /* Loading States */
@@ -713,7 +752,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Accessibility */
@@ -736,6 +777,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
         <header class="dashboard-header">
@@ -805,7 +847,8 @@
                 <div class="data-grid">
                     <div class="card">
                         <h3 class="card-title">
-                            <img src="icon/market-data.png" alt="Market Data" width="20" height="20" class="section-icon">
+                            <img src="icon/market-data.png" alt="Market Data" width="20" height="20"
+                                class="section-icon">
                             Market Data
                         </h3>
                         <div class="data-item">
@@ -872,11 +915,12 @@
                         </div>
                     </div>
                 </div>
-            </section>        
-    <!-- Verification Section -->
+            </section>
+            <!-- Verification Section -->
             <section class="verification-section card">
                 <h2 class="card-title">
-                    <img src="icon/Flare-netwrok-vrification.png" alt="Flare Verification" width="20" height="20" class="section-icon">
+                    <img src="icon/Flare-netwrok-vrification.png" alt="Flare Verification" width="20" height="20"
+                        class="section-icon">
                     Flare Network Verification
                 </h2>
                 <table class="status-table">
@@ -913,13 +957,16 @@
                 <div id="component-overall-status" class="status-indicator inactive" style="margin-top: 1rem;">
                     Overall System: <span id="overall-status">Processing...</span>
                 </div>
-                
+
                 <div style="margin-top: 1rem;">
                     <button id="connect-wallet-btn" class="btn btn-primary" style="width: 100%;">
-                        <img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg" alt="MetaMask" width="20" height="20" class="metamask-icon">
+                        <img src="https://images.ctfassets.net/clixtyxoaeas/1ezuBGezqfIeifWdVtwU4c/d970d4cdf13b163efddddd5709164d2e/MetaMask-icon-Fox.svg"
+                            alt="MetaMask" width="20" height="20" class="metamask-icon">
                         Connect MetaMask to Flare Coston2
                     </button>
-                    <div id="wallet-address" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-text-secondary); display: none;"></div>
+                    <div id="wallet-address"
+                        style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-text-secondary); display: none;">
+                    </div>
                 </div>
             </section>
 
@@ -939,8 +986,11 @@
                         Reset to Normal
                     </button>
                 </div>
-                <div id="attack-info" class="card" style="margin-top: 1rem; display: none; background: var(--color-error); color: white;">
-                    <div style="font-weight: 600; margin-bottom: 0.5rem;"><img src="icon/warning.png" alt="Warning" width="16" height="16" style="filter: brightness(0) invert(1); margin-right: 0.5rem;"> ATTACK MODE ACTIVE</div>
+                <div id="attack-info" class="card"
+                    style="margin-top: 1rem; display: none; background: var(--color-error); color: white;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;"><img src="icon/warning.png" alt="Warning"
+                            width="16" height="16" style="filter: brightness(0) invert(1); margin-right: 0.5rem;">
+                        ATTACK MODE ACTIVE</div>
                     <div id="attack-details" style="font-size: 0.875rem; line-height: 1.5;"></div>
                 </div>
             </section>
@@ -976,7 +1026,7 @@
         // Theme Management System
         class ThemeManager {
             constructor() {
-                this.currentTheme = localStorage.getItem('theme') || 
+                this.currentTheme = localStorage.getItem('theme') ||
                     (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 this.init();
             }
@@ -1023,7 +1073,22 @@
         const themeManager = new ThemeManager();
 
         // Existing API and functionality code
-        const API_URL = 'http://localhost:8000/api';
+        // API Configuration - Environment-aware
+        // Auto-detect if running on Netlify (production) or localhost (development)
+        function getApiUrl() {
+            // Check if we're on production (Netlify)
+            if (window.location.hostname.includes('netlify.app') ||
+                window.location.hostname.includes('your-custom-domain.com')) {
+                // Production: Use your deployed Render backend URL
+                // IMPORTANT: Replace this with your actual Render backend URL after deployment
+                return 'https://your-backend-app.onrender.com/api';
+            }
+            // Development: Use localhost
+            return 'http://localhost:8000/api';
+        }
+
+        const API_URL = getApiUrl();
+        console.log('🌐 API URL:', API_URL);
         let pollingInterval = null;
 
         const activateBtn = document.getElementById('activateBtn');
@@ -1534,4 +1599,5 @@
         loadRulesEngine();
     </script>
 </body>
+
 </html>

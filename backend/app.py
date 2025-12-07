@@ -33,14 +33,27 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS
+# Enable CORS with environment-specific configuration
+# In production, set ALLOWED_ORIGINS env var to your frontend URL
+# Example: ALLOWED_ORIGINS=https://your-app.netlify.app,https://custom-domain.com
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+if allowed_origins_env:
+    # Production: use specific origins from environment variable
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+else:
+    # Development/fallback: allow all origins
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+print(f"🔒 CORS enabled for origins: {allowed_origins}")
+
 
 # Initialize analyzer components
 cmc_api_key = os.getenv('CMC_API_KEY')
@@ -532,6 +545,18 @@ async def root():
             "polling_endpoint": "/api/analyze"
         }
     }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment monitoring"""
+    return {
+        "status": "healthy",
+        "service": "VERDICT API",
+        "version": "1.0.0",
+        "timestamp": datetime.now().isoformat()
+    }
+
 
 
 async def agent_loop(session_id: str, token: str, stablecoin: str, 
