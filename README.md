@@ -3,6 +3,10 @@
 > **The First AI Trading System with On-Chain Verification** 🔐  
 > Combines real-time AI analysis with Flare Network blockchain verification to ensure every trading signal is cryptographically verified and tamper-proof.
 
+Demo Video:  https://www.loom.com/share/b8aaefd1e8654fb380e7e2461bbada2f
+
+Deployed Link: https://veridict.netlify.app
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688.svg)](https://fastapi.tiangolo.com)
