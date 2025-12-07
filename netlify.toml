@@ -1,5 +1,5 @@
 [build]
-  publish = "frontend"
+  publish = "."
   command = "echo 'No build required for static site'"
 
 [[redirects]]
