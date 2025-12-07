@@ -1,959 +1,1248 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Veridict - Decentralized Trading Intelligence</title>
-
-  <!-- GSAP & ScrollTrigger for advanced animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0f0520;
-      color: white;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Intro Overlay Styles */
-    .intro-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000;
-      z-index: 99999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 1s ease, visibility 1s ease;
-    }
-
-    .intro-overlay.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    #intro-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* Main content initially hidden */
-    .main-content {
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-
-    .main-content.visible {
-      opacity: 1;
-    }
-
-    /* Launch App Button */
-    .launch-btn {
-      position: fixed;
-      top: 30px;
-      left: 30px;
-      z-index: 10000;
-      background: linear-gradient(135deg, #9D78FF, #7C3AED);
-      color: white;
-      border: none;
-      padding: 18px 40px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 10px 40px rgba(157, 120, 255, 0.5);
-      transition: all 0.4s ease;
-      text-decoration: none;
-      display: inline-block;
-      backdrop-filter: blur(10px);
-    }
-
-    .launch-btn:hover {
-      transform: translateY(-5px) scale(1.05);
-      box-shadow: 0 15px 50px rgba(157, 120, 255, 0.7);
-    }
-
-    /* Hero Section - 3D Space with Video */
-    .hero-section {
-      position: relative;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding-left: 8%;
-    }
-
-    .video-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-
-    .video-bg video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(0.4) contrast(1.3) saturate(1.2);
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      max-width: 700px;
-      opacity: 0;
-    }
-
-    .hero-content h1 {
-      font-size: 5.5em;
-      font-weight: 900;
-      margin-bottom: 25px;
-      background: linear-gradient(135deg, #C4B5FD 0%, #ffffff 50%, #9D78FF 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -2px;
-    }
-
-    .hero-content .tagline {
-      font-size: 1.6em;
-      line-height: 1.8;
-      color: #E9D5FF;
-      margin-bottom: 35px;
-      font-weight: 400;
-    }
-
-    .hero-stats {
-      display: flex;
-      gap: 50px;
-      margin-top: 50px;
-    }
-
-    .stat-box .number {
-      font-size: 3em;
-      font-weight: 900;
-      background: linear-gradient(135deg, #C4B5FD, #9D78FF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .stat-box .label {
-      font-size: 1em;
-      color: #DDD6FE;
-      margin-top: 8px;
-    }
-
-    /* Parallax Container */
-    .parallax-section {
-      position: relative;
-      min-height: 150vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    /* Animation 1: 3D Bitcoin Floating in Space */
-    .bitcoin-space {
-      background: linear-gradient(180deg, #0f0520 0%, #1a0a33 50%, #2d1555 100%);
-      perspective: 2000px;
-    }
-
-    .bitcoin-container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .bitcoin-3d {
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      transform-style: preserve-3d;
-    }
-
-    .bitcoin-coin {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #FFD700, #FFA500 50%, #8B6508);
-      box-shadow:
-        0 0 80px rgba(255, 215, 0, 0.6),
-        inset 0 0 60px rgba(0, 0, 0, 0.3),
-        inset 20px 20px 60px rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12em;
-      transform-style: preserve-3d;
-    }
-
-    .bitcoin-glow {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent 70%);
-      filter: blur(40px);
-      animation: pulse-glow 4s ease-in-out infinite;
-    }
-
-    @keyframes pulse-glow {
-
-      0%,
-      100% {
-        transform: scale(1);
-        opacity: 0.6;
-      }
-
-      50% {
-        transform: scale(1.2);
-        opacity: 0.9;
-      }
-    }
-
-    .space-particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 3px;
-      height: 3px;
-      background: white;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    }
-
-    .section-title-3d {
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 4em;
-      font-weight: 900;
-      background: linear-gradient(135deg, #FFD700, #FFA500);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-align: center;
-      opacity: 0;
-    }
-
-    /* Animation 2: Blockchain Network Visualization */
-    .blockchain-network {
-      background: linear-gradient(180deg, #2d1555 0%, #1a0a33 50%, #0f0520 100%);
-    }
-
-    .network-3d {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      transform-style: preserve-3d;
-      perspective: 1500px;
-    }
-
-    .blockchain-layer {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .block {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      background: linear-gradient(135deg, rgba(157, 120, 255, 0.3), rgba(124, 58, 237, 0.5));
-      border: 2px solid rgba(196, 181, 253, 0.6);
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2em;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
-      transform-style: preserve-3d;
-    }
-
-    .connection-line {
-      position: absolute;
-      height: 3px;
-      background: linear-gradient(90deg, rgba(196, 181, 253, 0.6), rgba(124, 58, 237, 0.8), rgba(196, 181, 253, 0.6));
-      box-shadow: 0 0 20px rgba(157, 120, 255, 0.8);
-      transform-origin: left center;
-    }
-
-    /* Animation 3: Multi-Coin Carousel */
-    .coin-carousel {
-      background: linear-gradient(180deg, #0f0520 0%, #1a0a33 50%, #2d1555 100%);
-      perspective: 2000px;
-    }
-
-    .carousel-3d {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform-style: preserve-3d;
-    }
-
-    .coin-card {
-      position: absolute;
-      width: 350px;
-      height: 450px;
-      background: linear-gradient(135deg, rgba(157, 120, 255, 0.2), rgba(124, 58, 237, 0.4));
-      border: 2px solid rgba(196, 181, 253, 0.5);
-      border-radius: 25px;
-      backdrop-filter: blur(15px);
-      box-shadow: 0 20px 60px rgba(124, 58, 237, 0.5);
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transform-style: preserve-3d;
-    }
-
-    .coin-icon {
-      font-size: 8em;
-      margin-bottom: 30px;
-      filter: drop-shadow(0 10px 30px rgba(255, 215, 0, 0.6));
-    }
-
-    .coin-name {
-      font-size: 2.5em;
-      font-weight: 900;
-      margin-bottom: 15px;
-      background: linear-gradient(135deg, #C4B5FD, #ffffff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .coin-price {
-      font-size: 1.8em;
-      color: #4ADE80;
-      font-weight: 700;
-    }
-
-    /* Animation 4: Data Stream Visualization */
-    .data-stream {
-      background: linear-gradient(180deg, #2d1555 0%, #1a0a33 50%, #0f0520 100%);
-    }
-
-    .stream-container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .data-column {
-      position: absolute;
-      top: -100%;
-      width: 2px;
-      height: 100%;
-      background: linear-gradient(180deg, transparent, rgba(157, 120, 255, 0.8), transparent);
-      box-shadow: 0 0 10px rgba(157, 120, 255, 0.6);
-    }
-
-    .data-point {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: #9D78FF;
-      border-radius: 50%;
-      box-shadow: 0 0 20px rgba(157, 120, 255, 1);
-    }
-
-    .stream-title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 4.5em;
-      font-weight: 900;
-      text-align: center;
-      background: linear-gradient(135deg, #C4B5FD, #9D78FF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      opacity: 0;
-      z-index: 10;
-    }
-
-    /* Animation 5: 3D Trading Terminal */
-    .trading-terminal {
-      background: linear-gradient(180deg, #0f0520 0%, #1a0a33 50%, #2d1555 100%);
-      perspective: 2000px;
-    }
-
-    .terminal-3d {
-      position: relative;
-      width: 90%;
-      max-width: 1400px;
-      height: 80vh;
-      margin: 0 auto;
-      transform-style: preserve-3d;
-    }
-
-    .terminal-screen {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(15, 5, 32, 0.9), rgba(26, 10, 51, 0.8));
-      border: 3px solid rgba(196, 181, 253, 0.4);
-      border-radius: 30px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 30px 80px rgba(124, 58, 237, 0.6);
-      padding: 40px;
-      transform-style: preserve-3d;
-      overflow: hidden;
-    }
-
-    .terminal-header {
-      font-size: 3em;
-      font-weight: 900;
-      margin-bottom: 40px;
-      background: linear-gradient(135deg, #C4B5FD, #9D78FF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .chart-area {
-      width: 100%;
-      height: 60%;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 20px;
-      border: 2px solid rgba(157, 120, 255, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .chart-line {
-      position: absolute;
-      bottom: 20%;
-      left: 5%;
-      width: 90%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #4ADE80, #22C55E, #16A34A, transparent);
-      box-shadow: 0 0 20px #4ADE80;
-    }
-
-    /* Animation 6: Galaxy Network */
-    .galaxy-network {
-      background: linear-gradient(180deg, #2d1555 0%, #1a0a33 50%, #0f0520 100%);
-      perspective: 2000px;
-    }
-
-    .galaxy-container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      transform-style: preserve-3d;
-    }
-
-    .galaxy-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 200px;
-      height: 200px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(157, 120, 255, 0.8), rgba(124, 58, 237, 0.4));
-      box-shadow: 0 0 100px rgba(157, 120, 255, 0.8);
-    }
-
-    .orbit {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      border: 2px solid rgba(196, 181, 253, 0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .planet {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #FFD700, #FFA500);
-      box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2em;
-    }
-
-    /* CTA Section */
-    .cta-section {
-      position: relative;
-      min-height: 100vh;
-      background: linear-gradient(180deg, #0f0520 0%, #1a0a33 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 100px 10%;
-    }
-
-    .cta-content {
-      position: relative;
-      z-index: 2;
-    }
-
-    .cta-content h2 {
-      font-size: 4.5em;
-      font-weight: 900;
-      margin-bottom: 40px;
-      background: linear-gradient(135deg, #C4B5FD 0%, #ffffff 50%, #9D78FF 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .cta-content p {
-      font-size: 1.6em;
-      color: #E9D5FF;
-      margin-bottom: 60px;
-      line-height: 1.8;
-    }
-
-    .cta-button {
-      background: linear-gradient(135deg, #9D78FF, #7C3AED);
-      color: white;
-      border: none;
-      padding: 25px 70px;
-      border-radius: 50px;
-      font-size: 1.5em;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 15px 50px rgba(157, 120, 255, 0.6);
-      transition: all 0.4s ease;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .cta-button:hover {
-      transform: translateY(-8px) scale(1.05);
-      box-shadow: 0 20px 60px rgba(157, 120, 255, 0.8);
-    }
-
-    /* Footer */
-    footer {
-      background: #0a0015;
-      padding: 60px 10%;
-      text-align: center;
-      border-top: 1px solid rgba(196, 181, 253, 0.2);
-    }
-
-    footer p {
-      color: #DDD6FE;
-      font-size: 1em;
-    }
-
-    @media (max-width: 768px) {
-      .hero-content h1 {
-        font-size: 3em;
-      }
-
-      .section-title-3d {
-        font-size: 2.5em;
-      }
-
-      .bitcoin-3d {
-        width: 300px;
-        height: 300px;
-      }
-
-      .coin-card {
-        width: 250px;
-        height: 350px;
-      }
-
-      .terminal-3d {
-        width: 95%;
-        height: 60vh;
-      }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Veridict - Decentralized Trading Intelligence</title>
+
+<!-- GSAP & ScrollTrigger for advanced animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  html { scroll-behavior: smooth; }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f0520;
+    color: white;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Intro Overlay Styles */
+  .intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 1s ease, visibility 1s ease;
+  }
+
+  .intro-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  #intro-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Main content initially hidden */
+  .main-content {
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  .main-content.visible {
+    opacity: 1;
+  }
+
+  /* Launch App Button */
+  .launch-btn {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    z-index: 10000;
+    background: linear-gradient(135deg, #9D78FF, #7C3AED);
+    color: white;
+    border: none;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 40px rgba(157, 120, 255, 0.5);
+    transition: all 0.4s ease;
+    text-decoration: none;
+    display: inline-block;
+    backdrop-filter: blur(10px);
+  }
+
+  .launch-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 50px rgba(157, 120, 255, 0.7);
+  }
+
+  /* Hero Section - 3D Space with Video */
+  .hero-section {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 8%;
+  }
+
+  .video-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .video-bg video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) contrast(1.3) saturate(1.2);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    opacity: 0;
+  }
+
+  .hero-content h1 {
+    font-size: 5.5em;
+    font-weight: 900;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, #C4B5FD 0%, #ffffff 50%, #9D78FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -2px;
+  }
+
+  .hero-content .tagline {
+    font-size: 1.6em;
+    line-height: 1.8;
+    color: #E9D5FF;
+    margin-bottom: 35px;
+    font-weight: 400;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 50px;
+    margin-top: 50px;
+  }
+
+  .stat-box .number {
+    font-size: 3em;
+    font-weight: 900;
+    background: linear-gradient(135deg, #C4B5FD, #9D78FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-box .label {
+    font-size: 1em;
+    color: #DDD6FE;
+    margin-top: 8px;
+  }
+
+  /* Parallax Container */
+  .parallax-section {
+    position: relative;
+    min-height: 150vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Animation 1: 3D Bitcoin Floating in Space */
+  .bitcoin-space {
+    background: linear-gradient(180deg, #0f0520 0%, #1a0a33 50%, #2d1555 100%);
+    perspective: 2000px;
+  }
+
+  .bitcoin-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bitcoin-3d {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    transform-style: preserve-3d;
+  }
+
+  .bitcoin-coin {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #FFD700, #FFA500 50%, #8B6508);
+    box-shadow: 
+      0 0 80px rgba(255, 215, 0, 0.6),
+      inset 0 0 60px rgba(0, 0, 0, 0.3),
+      inset 20px 20px 60px rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12em;
+    transform-style: preserve-3d;
+  }
+
+  .bitcoin-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent 70%);
+    filter: blur(40px);
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 0.9; }
+  }
+
+  .space-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  }
+
+  .section-title-3d {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 4em;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    opacity: 0;
+  }
+
+  /* Animation 2: Blockchain Network Visualization */
+  .blockchain-network {
+    background: linear-gradient(180deg, #2d1555 0%, #1a0a33 50%, #0f0520 100%);
+  }
+
+  .network-3d {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    transform-style: preserve-3d;
+    perspective: 1500px;
+  }
+
+  .blockchain-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .block {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, rgba(157, 120, 255, 0.3), rgba(124, 58, 237, 0.5));
+    border: 2px solid rgba(196, 181, 253, 0.6);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
+    transform-style: preserve-3d;
+  }
+
+  .connection-line {
+    position: absolute;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(196, 181, 253, 0.6), rgba(124, 58, 237, 0.8), rgba(196, 181, 253, 0.6));
+    box-shadow: 0 0 20px rgba(157, 120, 255, 0.8);
+    transform-origin: left center;
+  }
+
+  /* Animation 3: Multi-Coin Carousel */
+  .coin-carousel {
+    background: linear-gradient(180deg, #0f0520 0%, #1a0a33 50%, #2d1555 100%);
+    perspective: 2000px;
+  }
+
+  .carousel-3d {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+  }
+
+  .coin-card {
+    position: absolute;
+    width: 350px;
+    height: 450px;
+    background: linear-gradient(135deg, rgba(157, 120, 255, 0.2), rgba(124, 58, 237, 0.4));
+    border: 2px solid rgba(196, 181, 253, 0.5);
+    border-radius: 25px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 20px 60px rgba(124, 58, 237, 0.5);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+  }
+
+  .coin-icon {
+    font-size: 8em;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 10px 30px rgba(255, 215, 0, 0.6));
+  }
+
+  .coin-name {
+    font-size: 2.5em;
+    font-weight: 900;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #C4B5FD, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .coin-price {
+    font-size: 1.8em;
+    color: #4ADE80;
+    font-weight: 700;
+  }
+
+  /* Animation 4: Data Stream Visualization */
+  .data-stream {
+    background: linear-gradient(180deg, #2d1555 0%, #1a0a33 50%, #0f0520 100%);
+  }
+
+  .stream-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .data-column {
+    position: absolute;
+    top: -100%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(157, 120, 255, 0.8), transparent);
+    box-shadow: 0 0 10px rgba(157, 120, 255, 0.6);
+  }
+
+  .data-point {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #9D78FF;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(157, 120, 255, 1);
+  }
+
+  .stream-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4.5em;
+    font-weight: 900;
+    text-align: center;
+    background: linear-gradient(135deg, #C4B5FD, #9D78FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    z-index: 10;
+  }
+
+  /* Animation 5: 3D Trading Terminal */
+  .trading-terminal {
+    background: linear-gradient(180deg, #0f0520 0%, #1a0a33 50%, #2d1555 100%);
+    perspective: 2000px;
+  }
+
+  .terminal-3d {
+    position: relative;
+    width: 90%;
+    max-width: 1400px;
+    height: 80vh;
+    margin: 0 auto;
+    transform-style: preserve-3d;
+  }
+
+  .terminal-screen {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(15, 5, 32, 0.9), rgba(26, 10, 51, 0.8));
+    border: 3px solid rgba(196, 181, 253, 0.4);
+    border-radius: 30px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 30px 80px rgba(124, 58, 237, 0.6);
+    padding: 40px;
+    transform-style: preserve-3d;
+    overflow: hidden;
+  }
+
+  .terminal-header {
+    font-size: 3em;
+    font-weight: 900;
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #C4B5FD, #9D78FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .chart-area {
+    width: 100%;
+    height: 60%;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    border: 2px solid rgba(157, 120, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-line {
+    position: absolute;
+    bottom: 20%;
+    left: 5%;
+    width: 90%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #4ADE80, #22C55E, #16A34A, transparent);
+    box-shadow: 0 0 20px #4ADE80;
+  }
+
+  /* Animation 6: Galaxy Network */
+  .galaxy-network {
+    background: linear-gradient(180deg, #2d1555 0%, #1a0a33 50%, #0f0520 100%);
+    perspective: 2000px;
+  }
+
+  .galaxy-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    transform-style: preserve-3d;
+  }
+
+  .galaxy-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(157, 120, 255, 0.8), rgba(124, 58, 237, 0.4));
+    box-shadow: 0 0 100px rgba(157, 120, 255, 0.8);
+  }
+
+  .orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 2px solid rgba(196, 181, 253, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .planet {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+  }
+
+  /* CTA Section */
+  .cta-section {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f0520 0%, #1a0a33 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 10%;
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .cta-content h2 {
+    font-size: 4.5em;
+    font-weight: 900;
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, #C4B5FD 0%, #ffffff 50%, #9D78FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cta-content p {
+    font-size: 1.6em;
+    color: #E9D5FF;
+    margin-bottom: 60px;
+    line-height: 1.8;
+  }
+
+  .cta-button {
+    background: linear-gradient(135deg, #9D78FF, #7C3AED);
+    color: white;
+    border: none;
+    padding: 25px 70px;
+    border-radius: 50px;
+    font-size: 1.5em;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 15px 50px rgba(157, 120, 255, 0.6);
+    transition: all 0.4s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 20px 60px rgba(157, 120, 255, 0.8);
+  }
+
+  /* Footer */
+  footer {
+    background: #0a0015;
+    padding: 60px 10%;
+    text-align: center;
+    border-top: 1px solid rgba(196, 181, 253, 0.2);
+  }
+
+  footer p {
+    color: #DDD6FE;
+    font-size: 1em;
+  }
+
+  @media (max-width: 768px) {
+    .hero-content h1 { font-size: 3em; }
+    .section-title-3d { font-size: 2.5em; }
+    .bitcoin-3d { width: 300px; height: 300px; }
+    .coin-card { width: 250px; height: 350px; }
+    .terminal-3d { width: 95%; height: 60vh; }
+  }
+</style>
 </head>
-
 <body>
 
-  <!-- Intro Sequence Overlay -->
-  <div id="intro-overlay" class="intro-overlay">
-    <canvas id="intro-canvas"></canvas>
+<!-- Intro Sequence Overlay -->
+<div id="intro-overlay" class="intro-overlay">
+  <canvas id="intro-canvas"></canvas>
+</div>
+
+<!-- Main Content (Initially Hidden) -->
+<div class="main-content">
+
+<!-- Launch App Button -->
+<a href="dashboard.html" class="launch-btn">🚀 Launch App</a>
+
+<!-- Hero Section with Video -->
+<section class="hero-section">
+  <div class="video-bg">
+    <video autoplay muted loop playsinline preload="auto">
+      <source src="https://aicm.store/static/media/Headervideo.f31b35a8331a4491b12b.mp4" type="video/mp4">
+    </video>
   </div>
-
-  <!-- Main Content (Initially Hidden) -->
-  <div class="main-content">
-
-    <!-- Launch App Button -->
-    <a href="dashboard.html" class="launch-btn">🚀 Launch App</a>
-
-    <!-- Hero Section with Video -->
-    <section class="hero-section">
-      <div class="video-bg">
-        <video autoplay muted loop playsinline preload="auto">
-          <source src="https://aicm.store/static/media/Headervideo.f31b35a8331a4491b12b.mp4" type="video/mp4">
-        </video>
+  
+  <div class="hero-content">
+    <h1>Veridict</h1>
+    <p class="tagline">Next-generation decentralized trading intelligence powered by Flare Network. Real-time verification meets AI precision.</p>
+    <div class="hero-stats">
+      <div class="stat-box">
+        <div class="number">$2.4B+</div>
+        <div class="label">Trading Volume</div>
       </div>
-
-      <div class="hero-content">
-        <h1>Veridict</h1>
-        <p class="tagline">Next-generation decentralized trading intelligence powered by Flare Network. Real-time
-          verification meets AI precision.</p>
-        <div class="hero-stats">
-          <div class="stat-box">
-            <div class="number">$2.4B+</div>
-            <div class="label">Trading Volume</div>
-          </div>
-          <div class="stat-box">
-            <div class="number">50K+</div>
-            <div class="label">Active Users</div>
-          </div>
-          <div class="stat-box">
-            <div class="number">99.9%</div>
-            <div class="label">Uptime</div>
-          </div>
-        </div>
+      <div class="stat-box">
+        <div class="number">50K+</div>
+        <div class="label">Active Users</div>
       </div>
-    </section>
-
-    <!-- Animation 1: 3D Bitcoin in Space -->
-    <section class="parallax-section bitcoin-space">
-      <div class="space-particles" id="spaceParticles"></div>
-      <h2 class="section-title-3d" id="bitcoinTitle">Bitcoin Universe</h2>
-      <div class="bitcoin-container">
-        <div class="bitcoin-glow"></div>
-        <div class="bitcoin-3d" id="bitcoin3d">
-          <div class="bitcoin-coin">₿</div>
-        </div>
+      <div class="stat-box">
+        <div class="number">99.9%</div>
+        <div class="label">Uptime</div>
       </div>
-    </section>
-
-    <!-- Animation 2: Blockchain Network -->
-    <section class="parallax-section blockchain-network">
-      <div class="network-3d" id="blockchainNetwork">
-        <!-- Blocks will be generated by JS -->
-      </div>
-    </section>
-
-    <!-- Animation 3: Multi-Coin Carousel -->
-    <section class="parallax-section coin-carousel">
-      <div class="carousel-3d" id="coinCarousel">
-        <div class="coin-card" data-coin="btc">
-          <div class="coin-icon">₿</div>
-          <div class="coin-name">Bitcoin</div>
-          <div class="coin-price">$97,450</div>
-        </div>
-        <div class="coin-card" data-coin="eth">
-          <div class="coin-icon">Ξ</div>
-          <div class="coin-name">Ethereum</div>
-          <div class="coin-price">$3,680</div>
-        </div>
-        <div class="coin-card" data-coin="sol">
-          <div class="coin-icon">◎</div>
-          <div class="coin-name">Solana</div>
-          <div class="coin-price">$245</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Animation 4: Data Stream -->
-    <section class="parallax-section data-stream">
-      <div class="stream-container" id="dataStream">
-        <h2 class="stream-title" id="streamTitle">Real-Time Data Intelligence</h2>
-      </div>
-    </section>
-
-    <!-- Animation 5: 3D Trading Terminal -->
-    <section class="parallax-section trading-terminal">
-      <div class="terminal-3d" id="terminal3d">
-        <div class="terminal-screen">
-          <div class="terminal-header">Advanced Trading Dashboard</div>
-          <div class="chart-area">
-            <canvas id="chartLine"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Animation 6: Galaxy Network -->
-    <section class="parallax-section galaxy-network">
-      <div class="galaxy-container" id="galaxyContainer">
-        <div class="galaxy-center"></div>
-        <!-- Orbits and planets will be generated by JS -->
-      </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-      <div class="cta-content">
-        <h2>Ready to Start Trading?</h2>
-        <p>Join thousands of traders using Veridict for intelligent,<br>verified trading decisions.</p>
-        <a href="dashboard.html" class="cta-button">Launch Dashboard →</a>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-      <p>&copy; 2025 Veridict. Powered by Flare Network. All rights reserved.</p>
-    </footer>
-
+    </div>
   </div>
-  <!-- End Main Content -->
+</section>
 
-  <!-- Intro Animation Script -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Animation 1: 3D Bitcoin in Space -->
+<section class="parallax-section bitcoin-space">
+  <div class="space-particles" id="spaceParticles"></div>
+  <h2 class="section-title-3d" id="bitcoinTitle">Bitcoin Universe</h2>
+  <div class="bitcoin-container">
+    <div class="bitcoin-glow"></div>
+    <div class="bitcoin-3d" id="bitcoin3d">
+      <div class="bitcoin-coin">₿</div>
+    </div>
+  </div>
+</section>
 
-  <script>
-    // CINEMATIC INTRO SEQUENCE
-    class IntroSequence {
-      constructor(canvas, onComplete) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.onComplete = onComplete;
-        this.particles = [];
-        this.animationFrame = null;
-        this.startTime = null;
+<!-- Animation 2: Blockchain Network -->
+<section class="parallax-section blockchain-network">
+  <div class="network-3d" id="blockchainNetwork">
+    <!-- Blocks will be generated by JS -->
+  </div>
+</section>
 
-        this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
+<!-- Animation 3: Multi-Coin Carousel -->
+<section class="parallax-section coin-carousel">
+  <div class="carousel-3d" id="coinCarousel">
+    <div class="coin-card" data-coin="btc">
+      <div class="coin-icon">₿</div>
+      <div class="coin-name">Bitcoin</div>
+      <div class="coin-price">$97,450</div>
+    </div>
+    <div class="coin-card" data-coin="eth">
+      <div class="coin-icon">Ξ</div>
+      <div class="coin-name">Ethereum</div>
+      <div class="coin-price">$3,680</div>
+    </div>
+    <div class="coin-card" data-coin="sol">
+      <div class="coin-icon">◎</div>
+      <div class="coin-name">Solana</div>
+      <div class="coin-price">$245</div>
+    </div>
+  </div>
+</section>
 
-        this.centerX = this.canvas.width / 2;
-        this.centerY = this.canvas.height / 2;
+<!-- Animation 4: Data Stream -->
+<section class="parallax-section data-stream">
+  <div class="stream-container" id="dataStream">
+    <h2 class="stream-title" id="streamTitle">Real-Time Data Intelligence</h2>
+  </div>
+</section>
 
-        document.body.style.overflow = 'hidden';
-      }
+<!-- Animation 5: 3D Trading Terminal -->
+<section class="parallax-section trading-terminal">
+  <div class="terminal-3d" id="terminal3d">
+    <div class="terminal-screen">
+      <div class="terminal-header">Advanced Trading Dashboard</div>
+      <div class="chart-area">
+        <canvas id="chartLine"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
 
-      resizeCanvas() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.centerX = this.canvas.width / 2;
-        this.centerY = this.canvas.height / 2;
-      }
+<!-- Animation 6: Galaxy Network -->
+<section class="parallax-section galaxy-network">
+  <div class="galaxy-container" id="galaxyContainer">
+    <div class="galaxy-center"></div>
+    <!-- Orbits and planets will be generated by JS -->
+  </div>
+</section>
 
-      start() {
-        console.log('🎬 Starting intro sequence...');
-        this.startTime = Date.now();
-        this.createParticles();
-        this.animate();
-      }
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="cta-content">
+    <h2>Ready to Start Trading?</h2>
+    <p>Join thousands of traders using Veridict for intelligent,<br>verified trading decisions.</p>
+    <a href="dashboard.html" class="cta-button">Launch Dashboard →</a>
+  </div>
+</section>
 
-      createParticles() {
-        const particleCount = 75;
-        const colors = ['#00ff41', '#00cc33', '#00f5ff', '#00d9ff', '#14f195'];
+<!-- Footer -->
+<footer>
+  <p>&copy; 2025 Veridict. Powered by Flare Network. All rights reserved.</p>
+</footer>
 
-        for (let i = 0; i < particleCount; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const distance = Math.max(this.canvas.width, this.canvas.height) * 0.7;
+</div>
+<!-- End Main Content -->
 
-          this.particles.push({
-            x: this.centerX + Math.cos(angle) * distance,
-            y: this.centerY + Math.sin(angle) * distance,
-            targetX: this.centerX,
-            targetY: this.centerY,
-            angle: angle,
-            distance: distance,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            size: Math.random() * 3 + 2,
-            speed: Math.random() * 0.5 + 0.5,
-            opacity: 0
-          });
-        }
-      }
+<!-- Intro Animation Script -->
+<script>
+// CINEMATIC INTRO SEQUENCE
+class IntroSequence {
+  constructor(canvas, onComplete) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.onComplete = onComplete;
+    this.particles = [];
+    this.animationFrame = null;
+    this.startTime = null;
+    
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+    
+    this.centerX = this.canvas.width / 2;
+    this.centerY = this.canvas.height / 2;
+    
+    document.body.style.overflow = 'hidden';
+  }
 
-      animate() {
-        const elapsed = (Date.now() - this.startTime) / 1000;
+  resizeCanvas() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.centerX = this.canvas.width / 2;
+    this.centerY = this.canvas.height / 2;
+  }
 
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  start() {
+    console.log('🎬 Starting intro sequence...');
+    this.startTime = Date.now();
+    this.createParticles();
+    this.animate();
+  }
 
-        if (elapsed < 1.2) {
-          this.animateParticles(elapsed / 0.6);
-        } else if (elapsed < 2.0) {
-          this.fuseParticles((elapsed - 1.2) / 0.8);
-        } else if (elapsed < 2.2) {
-          this.burstEffect((elapsed - 2.0) / 0.2);
-        } else {
-          this.unlockScroll();
-          return;
-        }
+  createParticles() {
+    const particleCount = 75;
+    const colors = ['#00ff41', '#00cc33', '#00f5ff', '#00d9ff', '#14f195'];
 
-        this.animationFrame = requestAnimationFrame(() => this.animate());
-      }
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.max(this.canvas.width, this.canvas.height) * 0.7;
+      
+      this.particles.push({
+        x: this.centerX + Math.cos(angle) * distance,
+        y: this.centerY + Math.sin(angle) * distance,
+        targetX: this.centerX,
+        targetY: this.centerY,
+        angle: angle,
+        distance: distance,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 3 + 2,
+        speed: Math.random() * 0.5 + 0.5,
+        opacity: 0
+      });
+    }
+  }
 
-      animateParticles(elapsed) {
-        this.particles.forEach(particle => {
-          particle.opacity = Math.min(elapsed / 0.5, 1);
+  animate() {
+    const elapsed = (Date.now() - this.startTime) / 1000;
 
-          const progress = elapsed / 2;
-          const spiralAngle = particle.angle + progress * Math.PI * 4;
-          const currentDistance = particle.distance * (1 - progress);
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-          particle.x = this.centerX + Math.cos(spiralAngle) * currentDistance;
-          particle.y = this.centerY + Math.sin(spiralAngle) * currentDistance;
-
-          this.ctx.beginPath();
-          this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-          this.ctx.fillStyle = particle.color + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
-          this.ctx.shadowBlur = 10;
-          this.ctx.shadowColor = particle.color;
-          this.ctx.fill();
-          this.ctx.shadowBlur = 0;
-        });
-      }
-
-      fuseParticles(elapsed) {
-        const progress = elapsed / 1;
-
-        this.particles.forEach(particle => {
-          particle.x = this.centerX;
-          particle.y = this.centerY;
-
-          this.ctx.beginPath();
-          this.ctx.arc(particle.x, particle.y, particle.size * (1 - progress * 0.5), 0, Math.PI * 2);
-          this.ctx.fillStyle = particle.color + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
-          this.ctx.shadowBlur = 20 * progress;
-          this.ctx.shadowColor = particle.color;
-          this.ctx.fill();
-          this.ctx.shadowBlur = 0;
-        });
-
-        this.ctx.beginPath();
-        this.ctx.arc(this.centerX, this.centerY, 5 + progress * 10, 0, Math.PI * 2);
-        const gradient = this.ctx.createRadialGradient(
-          this.centerX, this.centerY, 0,
-          this.centerX, this.centerY, 15 + progress * 10
-        );
-        gradient.addColorStop(0, '#ffffff');
-        gradient.addColorStop(0.5, '#00f5ff');
-        gradient.addColorStop(1, 'transparent');
-        this.ctx.fillStyle = gradient;
-        this.ctx.fill();
-      }
-
-      burstEffect(elapsed) {
-        const progress = elapsed / 0.5;
-        const radius = progress * 150;
-        const opacity = 1 - progress;
-
-        this.ctx.beginPath();
-        this.ctx.arc(this.centerX, this.centerY, radius, 0, Math.PI * 2);
-        this.ctx.strokeStyle = `rgba(0, 245, 255, ${opacity * 0.5})`;
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
-
-        this.ctx.beginPath();
-        this.ctx.arc(this.centerX, this.centerY, 20, 0, Math.PI * 2);
-        const gradient = this.ctx.createRadialGradient(
-          this.centerX, this.centerY, 0,
-          this.centerX, this.centerY, 40
-        );
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
-        gradient.addColorStop(0.5, `rgba(0, 245, 255, ${opacity * 0.5})`);
-        gradient.addColorStop(1, 'transparent');
-        this.ctx.fillStyle = gradient;
-        this.ctx.fill();
-      }
-
-      unlockScroll() {
-        console.log('✅ Intro sequence complete');
-
-        if (this.animationFrame) {
-          cancelAnimationFrame(this.animationFrame);
-        }
-
-        document.body.style.overflow = '';
-
-        if (this.onComplete) {
-          this.onComplete();
-        }
-      }
+    if (elapsed < 1.2) {
+      this.animateParticles(elapsed / 0.6);
+    } else if (elapsed < 2.0) {
+      this.fuseParticles((elapsed - 1.2) / 0.8);
+    } else if (elapsed < 2.2) {
+      this.burstEffect((elapsed - 2.0) / 0.2);
+    } else {
+      this.unlockScroll();
+      return;
     }
 
-    // Initialize intro on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      const introOverlay = document.getElementById('intro-overlay');
-      const introCanvas = document.getElementById('intro-canvas');
-      const mainContent = document.querySelector('.main-content');
+    this.animationFrame = requestAnimationFrame(() => this.animate());
+  }
 
-      const introSequence = new IntroSequence(introCanvas, () => {
-        setTimeout(() => {
-          introOverlay.classList.add('hidden');
-          mainContent.classList.add('visible');
-        }, 300);
-      });
-
-      introSequence.start();
+  animateParticles(elapsed) {
+    this.particles.forEach(particle => {
+      particle.opacity = Math.min(elapsed / 0.5, 1);
+      
+      const progress = elapsed / 2;
+      const spiralAngle = particle.angle + progress * Math.PI * 4;
+      const currentDistance = particle.distance * (1 - progress);
+      
+      particle.x = this.centerX + Math.cos(spiralAngle) * currentDistance;
+      particle.y = this.centerY + Math.sin(spiralAngle) * currentDistance;
+      
+      this.ctx.beginPath();
+      this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      this.ctx.fillStyle = particle.color + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
+      this.ctx.shadowBlur = 10;
+      this.ctx.shadowColor = particle.color;
+      this.ctx.fill();
+      this.ctx.shadowBlur = 0;
     });
+  }
 
-    // GSAP Animations (loaded after intro completes)
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Hero Content Animation on Load
-    gsap.to('.hero-content', {
-      opacity: 1,
-      y: 0,
-      duration: 2,
-      ease: 'power3.out',
-      delay: 2.5  // After intro completes
+  fuseParticles(elapsed) {
+    const progress = elapsed / 1;
+    
+    this.particles.forEach(particle => {
+      particle.x = this.centerX;
+      particle.y = this.centerY;
+      
+      this.ctx.beginPath();
+      this.ctx.arc(particle.x, particle.y, particle.size * (1 - progress * 0.5), 0, Math.PI * 2);
+      this.ctx.fillStyle = particle.color + Math.floor(particle.opacity * 255).toString(16).padStart(2, '0');
+      this.ctx.shadowBlur = 20 * progress;
+      this.ctx.shadowColor = particle.color;
+      this.ctx.fill();
+      this.ctx.shadowBlur = 0;
     });
+    
+    this.ctx.beginPath();
+    this.ctx.arc(this.centerX, this.centerY, 5 + progress * 10, 0, Math.PI * 2);
+    const gradient = this.ctx.createRadialGradient(
+      this.centerX, this.centerY, 0,
+      this.centerX, this.centerY, 15 + progress * 10
+    );
+    gradient.addColorStop(0, '#ffffff');
+    gradient.addColorStop(0.5, '#00f5ff');
+    gradient.addColorStop(1, 'transparent');
+    this.ctx.fillStyle = gradient;
+    this.ctx.fill();
+  }
 
-    // Rest of the animations...
-    // (Continuing from previous code - Bitcoin, blockchain, carousel etc.)
-  </script>
+  burstEffect(elapsed) {
+    const progress = elapsed / 0.5;
+    const radius = progress * 150;
+    const opacity = 1 - progress;
+    
+    this.ctx.beginPath();
+    this.ctx.arc(this.centerX, this.centerY, radius, 0, Math.PI * 2);
+    this.ctx.strokeStyle = `rgba(0, 245, 255, ${opacity * 0.5})`;
+    this.ctx.lineWidth = 3;
+    this.ctx.stroke();
+    
+    this.ctx.beginPath();
+    this.ctx.arc(this.centerX, this.centerY, 20, 0, Math.PI * 2);
+    const gradient = this.ctx.createRadialGradient(
+      this.centerX, this.centerY, 0,
+      this.centerX, this.centerY, 40
+    );
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+    gradient.addColorStop(0.5, `rgba(0, 245, 255, ${opacity * 0.5})`);
+    gradient.addColorStop(1, 'transparent');
+    this.ctx.fillStyle = gradient;
+    this.ctx.fill();
+  }
 
+  unlockScroll() {
+    console.log('✅ Intro sequence complete');
+    
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+    
+    document.body.style.overflow = '';
+    
+    if (this.onComplete) {
+      this.onComplete();
+    }
+  }
+}
+
+// Initialize intro on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const introOverlay = document.getElementById('intro-overlay');
+  const introCanvas = document.getElementById('intro-canvas');
+  const mainContent = document.querySelector('.main-content');
+  
+  const introSequence = new IntroSequence(introCanvas, () => {
+    setTimeout(() => {
+      introOverlay.classList.add('hidden');
+      mainContent.classList.add('visible');
+    }, 300);
+  });
+  
+  introSequence.start();
+});
+</script>
+
+<!-- Advanced Animation Script -->
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Hero Content Animation on Load
+  gsap.to('.hero-content', {
+    opacity: 1,
+    y: 0,
+    duration: 2,
+    ease: 'power3.out',
+    delay: 0.5
+  });
+
+  // Generate Space Particles
+  const spaceParticles = document.getElementById('spaceParticles');
+  for (let i = 0; i < 100; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 3 + 's';
+    spaceParticles.appendChild(particle);
+  }
+
+  // Animation 1: 3D Bitcoin in Space
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: '.bitcoin-space',
+      start: 'center center',
+      end: '+=150%',
+      scrub: 1,
+      pin: true
+    }
+  })
+  .fromTo('#bitcoinTitle', 
+    { opacity: 0, y: 100 },
+    { opacity: 1, y: 0, duration: 0.3 }
+  )
+  .to('#bitcoin3d', {
+    rotationY: 720,
+    rotationX: 360,
+    scale: 2,
+    z: 500,
+    duration: 1,
+    ease: 'power2.inOut'
+  })
+  .to('#bitcoin3d', {
+    scale: 0.5,
+    z: -500,
+    rotationY: 1080,
+    opacity: 0.3,
+    duration: 0.7
+  });
+
+  // Parallax effect for space particles
+  gsap.to('.particle', {
+    scrollTrigger: {
+      trigger: '.bitcoin-space',
+      start: 'center center',
+      end: '+=150%',
+      scrub: true
+    },
+    y: (i) => -200 - (i * 2),
+    opacity: 0,
+    stagger: 0.05
+  });
+
+  // Animation 2: Blockchain Network
+  const blockchainNetwork = document.getElementById('blockchainNetwork');
+  const blocks = [];
+  const positions = [
+    { x: 20, y: 20, z: 0 },
+    { x: 50, y: 30, z: -200 },
+    { x: 80, y: 25, z: -400 },
+    { x: 35, y: 60, z: -150 },
+    { x: 65, y: 70, z: -350 },
+    { x: 50, y: 50, z: -250 }
+  ];
+
+  positions.forEach((pos, i) => {
+    const layer = document.createElement('div');
+    layer.className = 'blockchain-layer';
+    
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '⬢';
+    block.style.left = pos.x + '%';
+    block.style.top = pos.y + '%';
+    
+    layer.appendChild(block);
+    blockchainNetwork.appendChild(layer);
+    blocks.push({ element: block, layer: layer });
+  });
+
+  // Create connections
+  for (let i = 0; i < blocks.length - 1; i++) {
+    const line = document.createElement('div');
+    line.className = 'connection-line';
+    blockchainNetwork.appendChild(line);
+  }
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: '.blockchain-network',
+      start: 'center center',
+      end: '+=150%',
+      scrub: 1,
+      pin: true
+    }
+  })
+  .fromTo('.block',
+    { scale: 0, opacity: 0, rotationY: 0 },
+    { scale: 1, opacity: 1, rotationY: 360, stagger: 0.1, duration: 0.5 }
+  )
+  .to('.blockchain-layer', {
+    z: (i) => i * 100,
+    rotateY: (i) => i * 15,
+    duration: 0.8,
+    stagger: 0.05
+  })
+  .to('.block', {
+    scale: 1.5,
+    rotationX: 180,
+    duration: 0.5
+  })
+  .to('.blockchain-layer', {
+    rotateX: 45,
+    y: -100,
+    opacity: 0.5,
+    duration: 0.5
+  });
+
+  // Animation 3: Multi-Coin Carousel
+  const coinCards = gsap.utils.toArray('.coin-card');
+  const radius = 400;
+  
+  coinCards.forEach((card, i) => {
+    const angle = (i / coinCards.length) * Math.PI * 2;
+    gsap.set(card, {
+      x: Math.cos(angle) * radius,
+      z: Math.sin(angle) * radius,
+      rotationY: -angle * (180 / Math.PI)
+    });
+  });
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: '.coin-carousel',
+      start: 'center center',
+      end: '+=150%',
+      scrub: 1,
+      pin: true
+    }
+  })
+  .fromTo(coinCards,
+    { opacity: 0, scale: 0 },
+    { opacity: 1, scale: 1, stagger: 0.1, duration: 0.3 }
+  )
+  .to('#coinCarousel', {
+    rotationY: 360,
+    duration: 1,
+    ease: 'none'
+  })
+  .to(coinCards, {
+    scale: 1.2,
+    y: (i) => i * 50 - 50,
+    duration: 0.5
+  })
+  .to(coinCards, {
+    rotationY: '+=180',
+    scale: 0.8,
+    opacity: 0.3,
+    duration: 0.5
+  });
+
+  // Animation 4: Data Stream
+  const streamContainer = document.getElementById('dataStream');
+  for (let i = 0; i < 30; i++) {
+    const column = document.createElement('div');
+    column.className = 'data-column';
+    column.style.left = (i * 3.33) + '%';
+    streamContainer.appendChild(column);
+
+    // Add data points
+    for (let j = 0; j < 20; j++) {
+      const point = document.createElement('div');
+      point.className = 'data-point';
+      point.style.top = (j * 5) + '%';
+      point.style.left = (i * 3.33) + '%';
+      streamContainer.appendChild(point);
+    }
+  }
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: '.data-stream',
+      start: 'center center',
+      end: '+=150%',
+      scrub: 1,
+      pin: true
+    }
+  })
+  .fromTo('#streamTitle',
+    { opacity: 0, scale: 0.5 },
+    { opacity: 1, scale: 1, duration: 0.3 }
+  )
+  .to('.data-column', {
+    top: '100%',
+    stagger: 0.02,
+    duration: 1,
+    ease: 'none'
+  })
+  .to('.data-point', {
+    y: 1000,
+    opacity: 0,
+    stagger: 0.01,
+    duration: 0.8
+  }, '<')
+  .to('#streamTitle', {
+    scale: 1.5,
+    rotationX: 360,
+    duration: 0.5
+  });
+
+  // Animation 5: 3D Trading Terminal
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: '.trading-terminal',
+      start: 'center center',
+      end: '+=150%',
+      scrub: 1,
+      pin: true
+    }
+  })
+  .fromTo('#terminal3d',
+    { rotationX: -60, y: 500, opacity: 0 },
+    { rotationX: 0, y: 0, opacity: 1, duration: 0.4 }
+  )
+  .to('#terminal3d', {
+    rotationY: 15,
+    rotationX: -5,
+    scale: 1.1,
+    duration: 0.5
+  })
+  .to('.chart-line', {
+    scaleX: 1.5,
+    x: 100,
+    duration: 0.5
+  })
+  .to('#terminal3d', {
+    rotationY: -15,
+    rotationX: 5,
+    scale: 0.9,
+    y: -100,
+    duration: 0.5
+  });
+
+  // Animation 6: Galaxy Network
+  const galaxyContainer = document.getElementById('galaxyContainer');
+  const orbitSizes = [300, 500, 700];
+  const icons = ['₿', 'Ξ', '◎'];
+
+  orbitSizes.forEach((size, i) => {
+    const orbit = document.createElement('div');
+    orbit.className = 'orbit';
+    orbit.style.width = size + 'px';
+    orbit.style.height = size + 'px';
+    
+    const planet = document.createElement('div');
+    planet.className = 'planet';
+    planet.innerHTML = icons[i];
+    planet.style.top = '0';
+    planet.style.left = '50%';
+    planet.style.transform = 'translateX(-50%)';
+    
+    orbit.appendChild(planet);
+    galaxyContainer.appendChild(orbit);
+  });
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: '.galaxy-network',
+      start: 'center center',
+      end: '+=150%',
+      scrub: 1,
+      pin: true
+    }
+  })
+  .fromTo('.orbit',
+    { scale: 0, opacity: 0 },
+    { scale: 1, opacity: 1, stagger: 0.1, duration: 0.3 }
+  )
+  .to('.orbit', {
+    rotation: 360,
+    stagger: 0.1,
+    duration: 1,
+    ease: 'none'
+  })
+  .to('.planet', {
+    rotation: -360,
+    scale: 1.5,
+    stagger: 0.1,
+    duration: 0.5
+  })
+  .to('.galaxy-center', {
+    scale: 2,
+    rotation: 180,
+    duration: 0.5
+  }, '<');
+
+  // Smooth scroll behavior
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+<script>
+const ctx = document.getElementById('chartLine').getContext('2d');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+            label: 'Trading Signal Strength',
+            data: [12, 19, 15, 30, 28, 40, 55],
+            borderColor: 'green',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animations: false
+    }
+});
+</script>
 </body>
-
 </html>
