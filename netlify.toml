@@ -2,11 +2,6 @@
   publish = "."
   command = "echo 'No build required for static site'"
 
-[[redirects]]
-  from = "/"
-  to = "/intro-animation.html"
-  status = 200
-
 # Serve all HTML files without needing .html extension
 [[redirects]]
   from = "/*"
