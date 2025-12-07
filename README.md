@@ -25,7 +25,7 @@
 ### 1. **AI-Powered Trading Analysis**
 - 🤖 **Gemini AI Sentiment Analysis** - Advanced NLP-based market sentiment scoring
 - 📊 **Real-time Market Data** - Live price, volume, and market cap from CoinMarketCap
-- ⛓️ **On-Chain Analysis** - Aptos blockchain activity and liquidity metrics
+- ⛓️ **On-Chain Analysis** - Flare blockchain activity and liquidity metrics
 - 🎯 **Smart Recommendations** - LONG, SHORT, or HOLD signals with confidence scores
 - ⚡ **Leverage Suggestions** - Risk-adjusted leverage recommendations (1x-20x)
 - 💰 **PnL Calculations** - Projected profit/loss scenarios for perpetual trading
@@ -452,7 +452,7 @@ VERDICT/
 │   ├── sentiment_analyzer.py # Gemini AI sentiment analysis
 │   ├── decision_engine.py    # Signal combination & recommendation
 │   ├── position_manager.py   # Position tracking & management
-│   ├── aptos_analyzer.py     # On-chain data analysis
+│   ├── flare_analyzer.py     # On-chain data analysis
 │   ├── ftso_price_feed.py    # FTSO price feed integration
 │   ├── flare_data_connector.py # FDC integration
 │   ├── flare_verifier.py     # Smart contract verification
@@ -499,7 +499,7 @@ VERDICT/
 - Assesses risk levels (Low/Medium/High)
 
 ### **3. On-Chain Analysis**
-- Analyzes Aptos blockchain activity
+- Analyzes flare blockchain activity
 - Tracks transaction volume and liquidity
 - Generates on-chain trading signals
 
