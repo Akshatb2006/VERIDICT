@@ -221,9 +221,9 @@ async def perform_analysis(token: str, stablecoin: str, portfolio_amount: float,
     
     print(f"[perform_analysis] Market data received - Price: ${market_data.get('price', 0):.4f}, 24h Change: {market_data.get('percent_change_24h', 0):.2f}%")
     
-    # Step 2: Analyze sentiment - only call OpenAI every N iterations to avoid rate limits
+    # Step 2: Analyze sentiment - only call Gemini every N iterations to avoid rate limits
     # For real-time updates, we'll use a simplified sentiment based on market data
-    # Full OpenAI analysis can be done less frequently
+    # Full Gemini analysis can be done less frequently
     print(f"[perform_analysis] Analyzing sentiment...")
     sentiment_data = await user_sentiment_analyzer.analyze_token_sentiment(
         token.upper(),
@@ -556,7 +556,7 @@ async def agent_loop(session_id: str, token: str, stablecoin: str,
             print(f"[Agent Loop] Iteration #{iteration} - Fetching fresh data at {current_timestamp}")
             
             # Perform analysis - this should fetch fresh data from APIs
-            # This makes actual API calls to CMC, OpenAI, etc.
+            # This makes actual API calls to CMC, Gemini, etc.
             result = await perform_analysis(
                 token,
                 stablecoin,

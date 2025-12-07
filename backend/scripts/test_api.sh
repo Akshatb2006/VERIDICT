@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test API Endpoints for Sentenex Backend
+# Test API Endpoints for VERDICT Backend
 # Make sure your FastAPI server is running on localhost:8001
 
 BASE_URL="http://localhost:8001"
@@ -10,7 +10,7 @@ AMOUNT=100.0
 RISK="moderate"
 
 echo "=========================================="
-echo "Testing Sentenex API Endpoints"
+echo "Testing VERDICT API Endpoints"
 echo "=========================================="
 echo ""
 

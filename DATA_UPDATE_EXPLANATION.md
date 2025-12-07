@@ -33,7 +33,7 @@ The price `$91026.2063` stays the same because:
 
 ## 🔧 Fixed Issues
 
-1. **OpenAI API Error**: Fixed the `response_format` error
+1. **Gemini API Error**: Fixed the `response_format` error
    - Now uses `gpt-4o` model which supports JSON response format
    - Added fallback parsing if response_format isn't supported
 
@@ -52,7 +52,7 @@ Even when price stays the same, these fields **DO update**:
 3. ✅ `_poll_id` - Unique microsecond-precision ID
 4. ✅ `_poll_timestamp` - Additional timestamp for polling
 5. ✅ `agent_status` - Should be "active"
-6. ✅ `sentiment_data` - Should vary (once OpenAI is fixed)
+6. ✅ `sentiment_data` - Should vary (once Gemini is fixed)
 7. ✅ `recommendation` - May change based on sentiment
 
 ## 🎯 Frontend Should Update Because:

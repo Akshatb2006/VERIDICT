@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Sentenex Project Setup Script
-# This script helps set up the Sentenex project with proper dependency management
+# VERDICT Project Setup Script
+# This script helps set up the VERDICT project with proper dependency management
 
 echo "========================================="
-echo "Sentenex Project Setup"
+echo "VERDICT Project Setup"
 echo "========================================="
 echo ""
 
@@ -45,10 +45,10 @@ case $choice in
     echo ""
     echo "Creating virtual environment in home directory..."
     cd ~
-    python3 -m venv sentenex_venv
+    python3 -m venv verdict_venv
     
     echo "Activating virtual environment..."
-    source ~/sentenex_venv/bin/activate
+    source ~/verdict_venv/bin/activate
     
     echo "Installing dependencies..."
     cd "$PROJECT_DIR"
@@ -60,7 +60,7 @@ case $choice in
       echo ""
       echo "To start the server:"
       echo "  1. Activate the virtual environment:"
-      echo "     source ~/sentenex_venv/bin/activate"
+      echo "     source ~/verdict_venv/bin/activate"
       echo "  2. Navigate to project:"
       echo "     cd \"$PROJECT_DIR\""
       echo "  3. Start the server:"
@@ -73,22 +73,22 @@ case $choice in
     
   3)
     echo ""
-    echo "Moving project to ~/sentenex..."
+    echo "Moving project to ~/verdict..."
     
     # Check if ~/sentenex already exists
-    if [ -d ~/sentenex ]; then
-      echo "⚠️  Directory ~/sentenex already exists!"
+    if [ -d ~/verdict ]; then
+      echo "⚠️  Directory ~/verdict already exists!"
       read -p "Do you want to remove it and continue? (y/n): " confirm
       if [ "$confirm" != "y" ]; then
         echo "Setup cancelled."
         exit 0
       fi
-      rm -rf ~/sentenex
+      rm -rf ~/verdict
     fi
     
     # Move project
-    mv "$PROJECT_DIR" ~/sentenex
-    cd ~/sentenex
+    mv "$PROJECT_DIR" ~/verdict
+    cd ~/verdict
     
     echo "Creating virtual environment..."
     python3 -m venv venv
@@ -103,11 +103,11 @@ case $choice in
       echo ""
       echo "✅ Setup complete!"
       echo ""
-      echo "Your project has been moved to: ~/sentenex"
+      echo "Your project has been moved to: ~/verdict"
       echo ""
       echo "To start the server:"
       echo "  1. Navigate to project:"
-      echo "     cd ~/sentenex"
+      echo "     cd ~/verdict"
       echo "  2. Activate the virtual environment:"
       echo "     source venv/bin/activate"
       echo "  3. Start the server:"

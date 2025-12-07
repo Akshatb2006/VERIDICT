@@ -56,7 +56,7 @@ curl -X POST http://localhost:8001/api/activate \
 ```
 [Agent Loop] Iteration #1 - Fetching fresh data at ...
 [CMC API] Making fresh API call for APT at ...
-[OpenAI API] Making sentiment analysis call for APT at ...
+[Gemini API] Making sentiment analysis call for APT at ...
 ```
 
 ## 5. Poll Analysis (Agent Activated)
@@ -164,18 +164,18 @@ curl -X POST http://localhost:8001/api/deactivate \
 
 1. **Backend Console Logs**: Should show API calls every second:
    - `[CMC API] Making fresh API call...`
-   - `[OpenAI API] Making sentiment analysis call...`
+   - `[Gemini API] Making sentiment analysis call...`
    - `[Agent Loop] Iteration #X...`
 
 2. **Response Data**: Each poll should return:
    - Different `timestamp` (even if price is same)
    - Incrementing `iteration` number
    - Fresh `market_data` from CMC API
-   - Updated `sentiment_data` from OpenAI API
+   - Updated `sentiment_data` from Gemini API
 
 3. **If data is "fixed"**:
    - Check backend logs - are APIs being called?
    - Check if CMC API is returning same price (normal if market hasn't moved)
-   - Check if OpenAI is being called (might be slow/expensive)
+   - Check if Gemini is being called (might be slow/expensive)
    - The `timestamp` and `iteration` should still change every second
 

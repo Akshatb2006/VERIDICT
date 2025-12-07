@@ -1,6 +1,6 @@
-# Frontend - SentenexAI Dashboard
+# Frontend - VERDICT Dashboard
 
-This directory contains the web-based user interface for SentenexAI/VERDICT.
+This directory contains the web-based user interface for VERDICT.
 
 ## Structure
 
@@ -13,7 +13,7 @@ frontend/
 ## Files
 
 ### dashboard.html
-The main dashboard interface for interacting with the SentenexAI API. Features:
+The main dashboard interface for interacting with the VERDICT API. Features:
 - Token analysis input form
 - Real-time trading recommendations (LONG/SHORT/HOLD)
 - Market data visualization

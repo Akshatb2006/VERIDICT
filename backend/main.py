@@ -19,13 +19,13 @@ class PerpDEXAnalyzer:
         
         # Initialize APIs
         cmc_api_key = os.getenv('CMC_API_KEY')
-        openai_api_key = os.getenv('OPENAI_API_KEY')
+        gemini_api_key = os.getenv('GEMINI_API_KEY')
         
-        if not cmc_api_key or not openai_api_key:
-            raise ValueError("Please set CMC_API_KEY and OPENAI_API_KEY in your .env file")
+        if not cmc_api_key or not gemini_api_key:
+            raise ValueError("Please set CMC_API_KEY and GEMINI_API_KEY in your .env file")
         
         self.cmc = CoinMarketCapAPI(cmc_api_key)
-        self.sentiment_analyzer = SentimentAnalyzer(openai_api_key)
+        self.sentiment_analyzer = SentimentAnalyzer(gemini_api_key)
         self.aptos_analyzer = AptosAnalyzer()
         self.decision_engine = DecisionEngine()
         
@@ -53,7 +53,7 @@ class PerpDEXAnalyzer:
         print(f"   Market Cap: ${market_data['market_cap']:,.0f}\n")
         
         # Step 2: Analyze sentiment
-        print("🤖 Analyzing sentiment with OpenAI...")
+        print("🤖 Analyzing sentiment with Gemini AI...")
         sentiment_data = self.sentiment_analyzer.analyze_token_sentiment(
             token_symbol, 
             market_data['name'], 

@@ -1,6 +1,6 @@
-# Backend - SentenexAI API Server
+# Backend - VERDICT API Server
 
-This directory contains the FastAPI backend server for SentenexAI/VERDICT, which provides AI-powered trading analysis and verification.
+This directory contains the FastAPI backend server for VERDICT, which provides AI-powered trading analysis and verification.
 
 ## Structure
 
