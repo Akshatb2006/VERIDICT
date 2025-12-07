@@ -1,4 +1,4 @@
-# VERDICT - Blockchain-Verified AI Trading Analyzer
+# VERIDICT - Blockchain-Verified AI Trading Analyzer
 
 > **The First AI Trading System with On-Chain Verification** 🔐  
 > Combines real-time AI analysis with Flare Network blockchain verification to ensure every trading signal is cryptographically verified and tamper-proof.
@@ -11,7 +11,7 @@
 
 **Traditional AI trading tools have a trust problem:** You can't verify if the price data and recommendations are authentic or have been tampered with.
 
-**VERDICT solves this** by integrating blockchain verification at every step:
+**VERIDICT solves this** by integrating blockchain verification at every step:
 
 ✅ **FTSO Price Feeds** - Decentralized oracle price data from Flare Network validators  
 ✅ **Smart Contract Verification** - Every trading signal is verified on-chain  
