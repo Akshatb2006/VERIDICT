@@ -85,7 +85,6 @@ Configurable verification rules with a mini DSL:
 - 🔌 **Async/Await Support** - Built for modern Python applications
 
 ### 7. **Production-Ready**
-- 🐳 **Docker Support** - Containerized deployment
 - 🔧 **Environment Configuration** - `.env` file management
 - 📝 **Comprehensive Logging** - Detailed logs for debugging
 - 🧪 **Test Suite** - Unit tests and integration tests
@@ -111,7 +110,7 @@ Configurable verification rules with a mini DSL:
 
 ```bash
 git clone <repository-url>
-cd Sentenex-main
+cd VERIDICT
 cd backend
 pip install -r requirements.txt
 ```
@@ -125,7 +124,7 @@ Create a `.env` file in the `backend/` directory:
 CMC_API_KEY=your_coinmarketcap_api_key
 GEMINI_API_KEY=your_gemini_api_key
 
-# Optional: Flare Network Configuration
+# Flare Network Configuration
 FLARE_RPC_URL=https://coston2-api.flare.network/ext/C/rpc
 VERIFIER_CONTRACT_ADDRESS=your_deployed_contract_address
 DEPLOYER_PRIVATE_KEY=your_wallet_private_key
@@ -176,13 +175,6 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### Option 3: Docker
-
-```bash
-docker build -t verdict-api .
-docker run -p 8000:8000 --env-file .env verdict-api
 ```
 
 ## 🛠️ API Endpoints
