@@ -1072,26 +1072,6 @@
         // Initialize theme manager
         const themeManager = new ThemeManager();
 
-        // Existing API and functionality code
-        // API Configuration - Environment-aware
-        // Auto-detect if running on Netlify (production) or localhost (development)
-        function getApiUrl() {
-            // Check if we're on production (Netlify)
-            if (window.location.hostname.includes('netlify.app') ||
-                window.location.hostname.includes('your-custom-domain.com')) {
-                // Production: Use your deployed Render backend URL
-                // IMPORTANT: Replace this with your actual Render backend URL after deployment
-                return 'https://your-backend-app.onrender.com/api';
-            }
-            // Development: Use localhost
-            return 'http://localhost:8000/api';
-        }
-
-        const API_URL = getApiUrl();
-        console.log('🌐 API URL:', API_URL);
-        let pollingInterval = null;
-
-        const activateBtn = document.getElementById('activateBtn');
         const deactivateBtn = document.getElementById('deactivateBtn');
         const statusDiv = document.getElementById('status');
 
