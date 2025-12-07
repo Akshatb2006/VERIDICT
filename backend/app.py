@@ -33,16 +33,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS with environment-specific configuration
-# In production, set ALLOWED_ORIGINS env var to your frontend URL
-# Example: ALLOWED_ORIGINS=https://your-app.netlify.app,https://custom-domain.com
-allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
-if allowed_origins_env:
-    # Production: use specific origins from environment variable
-    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
-else:
-    # Development/fallback: allow all origins
-    allowed_origins = ["*"]
+# Enable CORS - Allow all origins for now
+# TODO: In production, restrict to specific domains for security
+allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
